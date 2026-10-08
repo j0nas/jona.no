@@ -46,8 +46,10 @@ standalone package.
 - **[S7] Icon set**: the Win95 16-colour shell icons (`public/img/win95/*.png`, from
   `@react95/icons`, MIT, as static assets only; not a dependency). The `shellNN` names are
   shell32.dll resource ids. `_32x32` for the desktop, folders and Start menu, `_16x16` for title
-  bars and taskbar buttons. The shortcut overlay is shell32 #30. The Start button flag
-  (`start-flag.png`) and the arrow cursor (`cursor-arrow.png`) are cut from RTM captures [S6].
+  bars and taskbar buttons. The shortcut overlay is shell32 #30. The Domains folder's Internet
+  shortcut icon (`internet-shortcut-*.png`) is url.dll #1102 from the same set (v2.5.3). The
+  Start button flag (`start-flag.png`) and the arrow cursor (`cursor-arrow.png`) are cut from
+  RTM captures [S6].
 
 ## Palette — "Windows Standard" scheme [S2][S6]
 

@@ -9,6 +9,7 @@ import RecycleBin from "../../apps/recycle-bin/RecycleBin";
 import Notepad from "../../apps/notepad/Notepad";
 import Personal from "../../apps/personal/Personal";
 import Documents from "../../apps/documents/Documents";
+import Domains from "../../apps/domains/Domains";
 import DocViewer from "../../apps/documents/DocViewer";
 import EmbeddedApp from "../../apps/embedded/EmbeddedApp";
 import ShutDown from "../../apps/system/ShutDown";
@@ -34,11 +35,12 @@ const DESKTOP_ICONS: { id: string; appId: AppId; label: string }[] = [
   { id: "personal-details", appId: "personal-details", label: "personal-details.txt" },
   { id: "personal", appId: "personal", label: "Personal" },
   { id: "documents", appId: "documents", label: "Documents" },
+  { id: "domains", appId: "domains", label: "Domains" },
   // Embedded apps (registry `embed` field) get a desktop icon automatically.
   ...embeddedAppIds.map((id) => ({ id, appId: id, label: apps[id].title })),
 ];
 
-const NOTEPAD_CONTENT = `Hi, I'm Jonas. I'm a software developer based in Oslo, Norway. I'm super passionate about computers, technology, animal rights and tinkering. Currently working on https://pep.dev.
+const NOTEPAD_CONTENT = `Hi, I'm Jonas. I'm a software developer based in Oslo, Norway. I'm super passionate about computers, technology, animal rights and tinkering.
 
 I love to use my skills to make people's lives better in whatever ways I can and to build things that do so. If you do too, feel free to reach out at: jonas.jensen@msn.com`;
 
@@ -65,6 +67,7 @@ const renderers: Partial<Record<AppId, Renderer>> = {
   "recycle-bin": (controls) => <RecycleBin controls={controls} />,
   personal: (controls) => <Personal controls={controls} />,
   documents: (controls, open) => <Documents controls={controls} onOpen={open} />,
+  domains: (controls) => <Domains controls={controls} />,
 };
 
 // Desktop icons fill 75px cells down the left, wrapping into more columns above
@@ -217,6 +220,7 @@ export default function Desktop() {
             icon: apps.documents.iconSmall,
             onClick: () => openApp("documents"),
           },
+          { label: "Do&mains", icon: apps.domains.iconSmall, onClick: () => openApp("domains") },
           // Embedded apps (registry `embed` field) get a Programs entry automatically.
           ...embeddedAppIds.map((id) => ({
             label: apps[id].title,

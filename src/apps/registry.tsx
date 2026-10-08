@@ -53,6 +53,12 @@ export const apps = {
     title: "Documents",
     defaultSize: { width: 400, height: 300 },
   },
+  domains: {
+    icon: "/img/win95/folder-32.png",
+    iconSmall: "/img/win95/folder-16.png",
+    title: "Domains",
+    defaultSize: { width: 480, height: 300 },
+  },
   "floor-planner": {
     icon: "/img/apps/floor-planner.svg",
     iconSmall: "/img/apps/floor-planner.svg",

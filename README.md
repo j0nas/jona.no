@@ -2,8 +2,8 @@
 
 A personal site styled as a Windows 95 desktop — draggable windows, a Start menu, a
 taskbar, and a handful of "apps" (Notepad, WordPad, My Computer, Recycle Bin, Personal), a
-Documents folder of markdown write-ups, plus standalone web apps (e.g. the Floor Planner)
-embedded in their own windows.
+Documents folder of markdown write-ups, a Domains folder of shortcuts to every domain I own,
+plus standalone web apps (e.g. the Floor Planner) embedded in their own windows.
 
 Live at **[jona.no](https://jona.no)** (the older `jonas-jensen.com` redirects there — see
 [Domains](#domains)).
