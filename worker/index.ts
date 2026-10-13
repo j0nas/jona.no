@@ -5,7 +5,8 @@ import { APPS, type EmbeddedApp, MOVED } from "./apps";
 // (run_worker_first) so that:
 // - the other addresses (www, and the old jonas-jensen.com) 301 to jona.no, path kept;
 // - /apps/<id>/* is the embedded app's live deploy, fetched and passed back same-origin;
-//   an app that moved to its own address (MOVED) redirects there, path kept.
+//   an app that moved to its own address (MOVED) redirects there, path kept, and one that
+//   left with no new home redirects to the home page.
 
 const CANONICAL = "jona.no";
 const ALIASES = new Set(["www.jona.no", "jonas-jensen.com", "www.jonas-jensen.com"]);
@@ -19,7 +20,9 @@ export default {
     }
     const m = /^\/apps\/([^/]+)(\/.*)?$/.exec(url.pathname);
     if (m && Object.hasOwn(MOVED, m[1])) {
-      return Response.redirect(`${MOVED[m[1]]}${m[2] ?? "/"}${url.search}`, 301);
+      const to = MOVED[m[1]];
+      if (to === null) return Response.redirect(`${url.origin}/`, 301);
+      return Response.redirect(`${to}${m[2] ?? "/"}${url.search}`, 301);
     }
     const app = m && Object.hasOwn(APPS, m[1]) ? APPS[m[1]] : undefined;
     if (m && app) {

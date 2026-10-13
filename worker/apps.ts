@@ -10,12 +10,16 @@ export interface EmbeddedApp {
 
 export const APPS: Record<string, EmbeddedApp> = {
   "floor-planner": { deploy: "https://j0nas.github.io/floor-boards-planner" },
-  "deck-box": { deploy: "https://j0nas.github.io/parametric-mtg-deck-box" },
-  "laser-deck-box": { deploy: "https://j0nas.github.io/laser-mtg-deck-box" },
   "lamp-shade": { deploy: "https://j0nas.github.io/lamp-shade-designer" },
 };
 
-/** Apps that were embedded here and now live at their own address: old links go there. */
-export const MOVED: Record<string, string> = {
+/**
+ * Apps that were embedded here and no longer are. An address (no trailing slash) is the app's
+ * new home: old links go there, path kept. null means it has no new home: every old link,
+ * deep paths included, goes to this site's home page.
+ */
+export const MOVED: Record<string, string | null> = {
   "edh-land": "https://edh.land",
+  "deck-box": null,
+  "laser-deck-box": null,
 };

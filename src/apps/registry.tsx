@@ -66,20 +66,6 @@ export const apps = {
     defaultSize: { width: 940, height: 660 },
     embed: "/apps/floor-planner/",
   },
-  "deck-box": {
-    icon: "/img/apps/deck-box.svg",
-    iconSmall: "/img/apps/deck-box.svg",
-    title: "Deck Box Builder",
-    defaultSize: { width: 980, height: 680 },
-    embed: "/apps/deck-box/",
-  },
-  "laser-deck-box": {
-    icon: "/img/apps/laser-deck-box.svg",
-    iconSmall: "/img/apps/laser-deck-box.svg",
-    title: "Laser Deck Box",
-    defaultSize: { width: 980, height: 680 },
-    embed: "/apps/laser-deck-box/",
-  },
   "lamp-shade": {
     icon: "/img/apps/lamp-shade.svg",
     iconSmall: "/img/apps/lamp-shade.svg",

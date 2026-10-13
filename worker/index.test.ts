@@ -54,6 +54,22 @@ describe("embedded apps", () => {
     expect(upstream).not.toHaveBeenCalled();
   });
 
+  test("an app that left with no new home redirects to the home page, whatever the path", async () => {
+    const upstream = vi.fn();
+    vi.stubGlobal("fetch", upstream);
+    for (const from of [
+      "https://jona.no/apps/deck-box/",
+      "https://jona.no/apps/deck-box",
+      "https://jona.no/apps/deck-box/assets/x.js?v=2",
+      "https://jona.no/apps/laser-deck-box/",
+      "https://jona.no/apps/laser-deck-box/some/deep/path/",
+    ]) {
+      const res = await get(from);
+      expect([res.status, res.headers.get("location")]).toEqual([301, "https://jona.no/"]);
+    }
+    expect(upstream).not.toHaveBeenCalled();
+  });
+
   test("a redirect within the deploy stays under /apps/<id>/", async () => {
     vi.stubGlobal(
       "fetch",
@@ -68,8 +84,8 @@ describe("embedded apps", () => {
   });
 
   test("the bare path gets its slash; an unknown app is the desktop's", async () => {
-    const res = await get("https://jona.no/apps/deck-box?x=1");
-    expect(res.headers.get("location")).toBe("https://jona.no/apps/deck-box/?x=1");
+    const res = await get("https://jona.no/apps/lamp-shade?x=1");
+    expect(res.headers.get("location")).toBe("https://jona.no/apps/lamp-shade/?x=1");
     expect(await (await get("https://jona.no/apps/nope/")).text()).toBe("desktop");
   });
 });
