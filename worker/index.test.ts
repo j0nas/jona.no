@@ -63,9 +63,6 @@ describe("embedded apps", () => {
       "https://jona.no/apps/deck-box/assets/x.js?v=2",
       "https://jona.no/apps/laser-deck-box/",
       "https://jona.no/apps/laser-deck-box/some/deep/path/",
-      "https://jona.no/apps/lamp-shade/",
-      "https://jona.no/apps/lamp-shade",
-      "https://jona.no/apps/lamp-shade/assets/index.js",
     ]) {
       const res = await get(from);
       expect([res.status, res.headers.get("location")]).toEqual([301, "https://jona.no/"]);

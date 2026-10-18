@@ -21,6 +21,4 @@ export const MOVED: Record<string, string | null> = {
   "edh-land": "https://edh.land",
   "deck-box": null,
   "laser-deck-box": null,
-  // A product of formeriet.no's lamp store now (2026-10-18), friends-only until the store opens.
-  "lamp-shade": null,
 };
