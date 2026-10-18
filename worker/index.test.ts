@@ -63,6 +63,9 @@ describe("embedded apps", () => {
       "https://jona.no/apps/deck-box/assets/x.js?v=2",
       "https://jona.no/apps/laser-deck-box/",
       "https://jona.no/apps/laser-deck-box/some/deep/path/",
+      "https://jona.no/apps/lamp-shade/",
+      "https://jona.no/apps/lamp-shade",
+      "https://jona.no/apps/lamp-shade/assets/index.js",
     ]) {
       const res = await get(from);
       expect([res.status, res.headers.get("location")]).toEqual([301, "https://jona.no/"]);
@@ -76,16 +79,16 @@ describe("embedded apps", () => {
       async () =>
         new Response(null, {
           status: 301,
-          headers: { location: "https://j0nas.github.io/lamp-shade-designer/docs/" },
+          headers: { location: "https://j0nas.github.io/floor-boards-planner/docs/" },
         }),
     );
-    const res = await get("https://jona.no/apps/lamp-shade/docs");
-    expect(res.headers.get("location")).toBe("/apps/lamp-shade/docs/");
+    const res = await get("https://jona.no/apps/floor-planner/docs");
+    expect(res.headers.get("location")).toBe("/apps/floor-planner/docs/");
   });
 
   test("the bare path gets its slash; an unknown app is the desktop's", async () => {
-    const res = await get("https://jona.no/apps/lamp-shade?x=1");
-    expect(res.headers.get("location")).toBe("https://jona.no/apps/lamp-shade/?x=1");
+    const res = await get("https://jona.no/apps/floor-planner?x=1");
+    expect(res.headers.get("location")).toBe("https://jona.no/apps/floor-planner/?x=1");
     expect(await (await get("https://jona.no/apps/nope/")).text()).toBe("desktop");
   });
 });

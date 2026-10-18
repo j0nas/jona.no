@@ -66,13 +66,6 @@ export const apps = {
     defaultSize: { width: 940, height: 660 },
     embed: "/apps/floor-planner/",
   },
-  "lamp-shade": {
-    icon: "/img/apps/lamp-shade.svg",
-    iconSmall: "/img/apps/lamp-shade.svg",
-    title: "Lamp Shade Designer",
-    defaultSize: { width: 1040, height: 720 },
-    embed: "/apps/lamp-shade/",
-  },
 } satisfies Record<string, AppMeta>;
 
 export type AppId = keyof typeof apps;
