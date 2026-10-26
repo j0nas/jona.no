@@ -59,6 +59,7 @@ Norwegian prices, October 2026, incl. VAT, at 9 cards per sheet. Ink costs are r
 | Printer   | [Epson EcoTank ET-8550](https://www.komplett.no/product/1183799/datautstyr/skrivereskannere/skrivere/epson-ecotank-et-8550-blekkskriver) (A3+, 6-colour photo ink) | 8 990 kr |
 | Cutter    | [Silhouette Cameo 5 Alpha](https://www.3djake.no/silhouette/cameo5a) with AutoBlade and the standard 12x12" mat                                                    | 3 670 kr |
 | Laminator | GBC Fusion 3100L, used, off Finn. Any A4 pouch laminator would probably do; not sure this one was worth it                                                         | 800 kr   |
+| Mat glue  | [Aleene's Tack It, 118 ml](https://lappelykke.no/sytilbehor/lim/aleenes-tack-it-applikerings-lim-118-ml), to re-tack the cutting mat; a tube lasts a long while    | 110 kr   |
 
 [^layout]:
     3x3 on A4 instead of 4x2. With the card-maker's 3x3 template, the registration marks sat
