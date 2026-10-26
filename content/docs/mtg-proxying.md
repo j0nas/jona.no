@@ -41,16 +41,16 @@ Norwegian prices, October 2026, incl. VAT, at 9 cards per sheet. Ink costs are r
 |                                                                                                                                                                  | Standard     | Double-sided | Holo foil               |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------------ | ----------------------- |
 | [MediaRange A4 glossy photo paper, 135 gsm](https://dvdink.no/fotopapir-blekkpatroner/fotopapir/kopi-mediarange-a4-fotopapir-glanset-135gr-100-ark), 70 kr / 100 | 0.08 kr      |              |                         |
-| [Double-sided glossy photo paper, 140 gsm](https://www.aliexpress.com/item/4000228649463.html), ~135 kr / 50                                                     |              | 0.30 kr      |                         |
-| [Holographic sticker paper](https://www.aliexpress.com/item/1005007298255984.html), ~520 kr / 100                                                                |              |              | 0.58 kr                 |
+| [Double-sided glossy photo paper, 140 gsm](https://www.aliexpress.com/item/4000228649463.html), ~169 kr / 50                                                     |              | 0.38 kr      |                         |
+| [Holographic sticker paper](https://www.aliexpress.com/item/1005007298255984.html), ~650 kr / 100                                                                |              |              | 0.72 kr                 |
 | [Apex A4 laminating pouches, 75 µm](https://www.kjell.com/no/produkter/kontor/laminering/lamineringslommer-a4-100-pk.-75-mikron-p15231)[^apex], 150 kr / 100     | 0.17 kr      | 0.17 kr      |                         |
 | Epson 114 ink, original, 6 x 70 ml at ~200 kr each, ~1 200 kr / set                                                                                              | ~0.27 kr     | ~0.55 kr     | ~0.27 kr                |
 | A bulk common to stick the foil on                                                                                                                               |              |              | whatever you paid       |
 | [66x91 mm perfect-fit inner sleeves, black](https://www.aliexpress.com/item/1005006897863485.html), ~88 kr / 150                                                 | 0.58 kr      | 0.58 kr      | 0.58 kr                 |
-| **Per card, unsleeved**                                                                                                                                          | **~0.52 kr** | **~1.02 kr** | **~0.85 kr + a common** |
-| **Per card, sleeved**                                                                                                                                            | **~1.10 kr** | **~1.60 kr** | **~1.43 kr + a common** |
-| **Per 100-card deck, unsleeved**                                                                                                                                 | **~52 kr**   | **~102 kr**  | **~85 kr + commons**    |
-| **Per 100-card deck, sleeved**                                                                                                                                   | **~110 kr**  | **~160 kr**  | **~143 kr + commons**   |
+| **Per card, unsleeved**                                                                                                                                          | **~0.52 kr** | **~1.10 kr** | **~0.99 kr + a common** |
+| **Per card, sleeved**                                                                                                                                            | **~1.10 kr** | **~1.68 kr** | **~1.57 kr + a common** |
+| **Per 100-card deck, unsleeved**                                                                                                                                 | **~52 kr**   | **~110 kr**  | **~99 kr + commons**    |
+| **Per 100-card deck, sleeved**                                                                                                                                   | **~110 kr**  | **~168 kr**  | **~157 kr + commons**   |
 
 ## One-off equipment
 
