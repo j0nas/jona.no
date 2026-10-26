@@ -19,7 +19,7 @@ The code is at [github.com/j0nas/mtg-proxy](https://github.com/j0nas/mtg-proxy).
    Additionally, _Bidirectional printing_ set to **off** and _Emphasize Text_ set to **Emphasize** under _More Options_.
 
 3. I let the printed sheets dry for a while[^dry], then laminate[^heat] using 75 micron glossy[^glossy] laminate pouches.
-4. .. and finally, cut out the cards on a Silhouette Cameo 5 Alpha.
+4. .. and finally, cut out the cards on a Silhouette Cameo 5 Alpha[^flat].
 5. If the edges look rough, I run the cards a second time through the laminator. This used to be more of an issue with matte laminating pouches, but doesn't seem to be necessary when using glossy pouches.
 
 ## Backs
@@ -65,6 +65,12 @@ Norwegian prices, October 2026, incl. VAT, at 9 cards per sheet. Ink costs are r
     3.5 mm from every edge and the Cameo 5 Alpha's optical scan kept misreading them. With
     three marks (an exact 5 mm square and two L's with 6 mm legs) placed 9 mm from the top
     and bottom, it finds them first time, in about 11 seconds.
+
+[^flat]:
+    I stick the sheet down with the mat on a table. One sheet I stuck down with the mat on my
+    office chair looked flat, but bonded in shallow waves, and the Cameo misread its marks on
+    every scan until I re-laid it on the table. `cut-proxies` now reads the paper beside each
+    mark with the cutter's sensor first, and stops when it doesn't read as paper.
 
 [^a4]:
     Most (all?) of this stack supports A3, but A3 stock is a lot more expensive, so it's not
