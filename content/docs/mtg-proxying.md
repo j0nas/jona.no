@@ -18,7 +18,7 @@ The code is at [github.com/j0nas/mtg-proxy](https://github.com/j0nas/mtg-proxy).
 
    Additionally, _Bidirectional printing_ set to **off** and _Emphasize Text_ set to **Emphasize** under _More Options_.
 
-3. I let the printed sheets dry for a while[^dry], then laminate[^heat] using 75 micron glossy[^glossy] laminate pouches.
+3. I laminate[^heat] the sheets straight off the printer[^dry], in 75 micron glossy[^glossy] laminate pouches.
 4. .. and finally, cut out the cards on a Silhouette Cameo 5 Alpha[^flat].
 5. If the edges look rough, I run the cards a second time through the laminator. This used to be more of an issue with matte laminating pouches, but doesn't seem to be necessary when using glossy pouches.
 
@@ -43,14 +43,14 @@ Norwegian prices, October 2026, incl. VAT, at 9 cards per sheet. Ink costs are r
 | [MediaRange A4 glossy photo paper, 135 gsm](https://dvdink.no/fotopapir-blekkpatroner/fotopapir/kopi-mediarange-a4-fotopapir-glanset-135gr-100-ark), 70 kr / 100 | 0.08 kr      |              |                         |
 | [Double-sided glossy photo paper, 140 gsm](https://www.aliexpress.com/item/4000228649463.html), ~135 kr / 50                                                     |              | 0.30 kr      |                         |
 | [Holographic sticker paper](https://www.aliexpress.com/item/1005007298255984.html), ~520 kr / 100                                                                |              |              | 0.58 kr                 |
-| [Apex A4 laminating pouches, 75 µm](https://www.kjell.com/no/produkter/kontor/laminering/lamineringslommer-a4-100-pk.-75-mikron-p15231)[^apex], 129 kr / 100     | 0.14 kr      | 0.14 kr      |                         |
+| [Apex A4 laminating pouches, 75 µm](https://www.kjell.com/no/produkter/kontor/laminering/lamineringslommer-a4-100-pk.-75-mikron-p15231)[^apex], 150 kr / 100     | 0.17 kr      | 0.17 kr      |                         |
 | Epson 114 ink, original, 6 x 70 ml at ~200 kr each, ~1 200 kr / set                                                                                              | ~0.27 kr     | ~0.55 kr     | ~0.27 kr                |
 | A bulk common to stick the foil on                                                                                                                               |              |              | whatever you paid       |
-| [66x91 mm perfect-fit inner sleeves, black](https://www.aliexpress.com/item/1005006897863485.html), ~250 kr / 500                                                | 0.50 kr      | 0.50 kr      | 0.50 kr                 |
-| **Per card, unsleeved**                                                                                                                                          | **~0.49 kr** | **~0.99 kr** | **~0.85 kr + a common** |
-| **Per card, sleeved**                                                                                                                                            | **~0.99 kr** | **~1.49 kr** | **~1.35 kr + a common** |
-| **Per 100-card deck, unsleeved**                                                                                                                                 | **~50 kr**   | **~100 kr**  | **~85 kr + commons**    |
-| **Per 100-card deck, sleeved**                                                                                                                                   | **~100 kr**  | **~150 kr**  | **~135 kr + commons**   |
+| [66x91 mm perfect-fit inner sleeves, black](https://www.aliexpress.com/item/1005006897863485.html), ~88 kr / 150                                                 | 0.58 kr      | 0.58 kr      | 0.58 kr                 |
+| **Per card, unsleeved**                                                                                                                                          | **~0.52 kr** | **~1.02 kr** | **~0.85 kr + a common** |
+| **Per card, sleeved**                                                                                                                                            | **~1.10 kr** | **~1.60 kr** | **~1.43 kr + a common** |
+| **Per 100-card deck, unsleeved**                                                                                                                                 | **~52 kr**   | **~102 kr**  | **~85 kr + commons**    |
+| **Per 100-card deck, sleeved**                                                                                                                                   | **~110 kr**  | **~160 kr**  | **~143 kr + commons**   |
 
 ## One-off equipment
 
@@ -76,9 +76,7 @@ Norwegian prices, October 2026, incl. VAT, at 9 cards per sheet. Ink costs are r
     Most (all?) of this stack supports A3, but A3 stock is a lot more expensive, so it's not
     worth it vs A4.
 
-[^dry]:
-    I haven't tested whether letting the prints dry before laminating makes a noticeable
-    difference.
+[^dry]: Letting the prints dry before laminating made no difference I could see.
 
 [^heat]:
     Cloudy lamination is too cold; run the pouches one grade above their rating. Wavy
