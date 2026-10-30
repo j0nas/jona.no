@@ -2,12 +2,37 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 import worker from "./index";
 
 const assets = vi.fn(async (_req: Request) => new Response("desktop"));
-const env = { ASSETS: { fetch: assets } } as unknown as Env;
-const get = (url: string, init?: RequestInit) => worker.fetch(new Request(url, init) as never, env);
+const files: Record<string, string> = {
+  "pilestredet/index.html": "<h1>før og etter</h1>",
+  "pilestredet/img/a.jpg": "0123456789",
+};
+const bucket = {
+  get: vi.fn(async (key: string, opts?: { range?: Headers }) => {
+    if (!(key in files)) return null;
+    const range = opts?.range?.get("range")?.match(/^bytes=(\d+)-(\d+)$/);
+    const [offset, end] = range ? [+range[1], +range[2]] : [0, files[key].length - 1];
+    return {
+      body: new Response(files[key].slice(offset, end + 1)).body,
+      size: files[key].length,
+      // As R2 returns it: every key present, the unused one undefined.
+      range: { offset, length: end - offset + 1, suffix: undefined },
+      httpEtag: '"e"',
+      writeHttpMetadata: (h: Headers) => h.set("content-type", "text/html"),
+    };
+  }),
+};
+const env = {
+  ASSETS: { fetch: assets },
+  PRIVATE: bucket,
+  PILESTREDET_PASSWORD: "hemmelig",
+} as unknown as Env;
+const get = (url: string, init?: RequestInit, e = env) =>
+  worker.fetch(new Request(url, init) as never, e);
 
 afterEach(() => {
   vi.unstubAllGlobals();
   assets.mockClear();
+  bucket.get.mockClear();
 });
 
 describe("addresses", () => {
@@ -87,5 +112,77 @@ describe("embedded apps", () => {
     const res = await get("https://jona.no/apps/floor-planner?x=1");
     expect(res.headers.get("location")).toBe("https://jona.no/apps/floor-planner/?x=1");
     expect(await (await get("https://jona.no/apps/nope/")).text()).toBe("desktop");
+  });
+});
+
+describe("private pages", () => {
+  const login = (password: string) =>
+    get("https://jona.no/pilestredet/", {
+      method: "POST",
+      body: new URLSearchParams({ password }),
+    });
+  const cookieFor = async (password: string) =>
+    (await login(password)).headers.get("set-cookie")!.split(";")[0];
+
+  test("ask for the password, and never touch the bucket before it's given", async () => {
+    for (const path of ["/pilestredet/", "/pilestredet/img/a.jpg"]) {
+      const res = await get(`https://jona.no${path}`);
+      expect(res.status).toBe(401);
+      expect(await res.text()).toContain('type="password"');
+      expect(res.headers.get("x-robots-tag")).toContain("noindex");
+    }
+    expect(bucket.get).not.toHaveBeenCalled();
+  });
+
+  test("the right password sets a cookie that opens the page; a wrong one doesn't", async () => {
+    const wrong = await login("feil");
+    expect([wrong.status, wrong.headers.get("set-cookie")]).toEqual([401, null]);
+    expect(await wrong.text()).toContain("Feil passord");
+
+    const right = await login("hemmelig");
+    expect([right.status, right.headers.get("location")]).toEqual([303, "/pilestredet/"]);
+    expect(right.headers.get("set-cookie")).toMatch(/Path=\/pilestredet;.*HttpOnly; Secure/);
+
+    const page = await get("https://jona.no/pilestredet/", {
+      headers: { cookie: `other=1; ${await cookieFor("hemmelig")}` },
+    });
+    expect([page.status, await page.text()]).toEqual([200, "<h1>før og etter</h1>"]);
+    expect(page.headers.get("x-robots-tag")).toContain("noindex");
+    expect(bucket.get.mock.calls[0][0]).toBe("pilestredet/index.html");
+  });
+
+  test("files are served from the page's folder, with byte ranges for video", async () => {
+    const cookie = await cookieFor("hemmelig");
+    const res = await get("https://jona.no/pilestredet/img/a.jpg", {
+      headers: { cookie, range: "bytes=2-5" },
+    });
+    expect([res.status, res.headers.get("content-range"), await res.text()]).toEqual([
+      206,
+      "bytes 2-5/10",
+      "2345",
+    ]);
+    expect(
+      (await get("https://jona.no/pilestredet/nope.jpg", { headers: { cookie } })).status,
+    ).toBe(404);
+  });
+
+  test("the bare path gets its slash", async () => {
+    const res = await get("https://jona.no/pilestredet?x=1");
+    expect([res.status, res.headers.get("location")]).toEqual([
+      301,
+      "https://jona.no/pilestredet/?x=1",
+    ]);
+  });
+
+  test("an unset password opens nothing", async () => {
+    const unset = { ...env, PILESTREDET_PASSWORD: undefined } as unknown as Env;
+    for (const password of ["", "undefined"]) {
+      const res = await get(
+        "https://jona.no/pilestredet/",
+        { method: "POST", body: new URLSearchParams({ password }) },
+        unset,
+      );
+      expect([res.status, res.headers.get("set-cookie")]).toEqual([404, null]);
+    }
   });
 });

@@ -20,5 +20,9 @@
     // Every request meets the Worker first: redirects and the /apps/* proxies.
     "run_worker_first": true,
   },
+  // Private pages' files (worker/private.ts), kept out of this public repo.
+  "r2_buckets": [{ "binding": "PRIVATE", "bucket_name": "jona-private" }],
+  // Each private page's password (worker/private.ts). `wrangler types` takes the names from here.
+  "secrets": { "required": ["PILESTREDET_PASSWORD"] },
   "observability": { "enabled": true },
 }

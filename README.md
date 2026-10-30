@@ -80,6 +80,21 @@ adding a file: the first `# ` heading is its title, the file name its slug, and 
 shareable at `/docs/<slug>` (e.g. [`/docs/mtg-proxying`](https://jona.no/docs/mtg-proxying)).
 The markdown is compiled at build time with `marked`, so the site stays a static SPA.
 
+## Private pages
+
+Some pages are for a few people only, and this repo is public, so their content never comes
+here. A private page is a folder of static files in the `jona-private` R2 bucket under
+`<slug>/`, served at `/<slug>/` by the Worker (`worker/private.ts`) to whoever has its
+password. The password is a Worker secret; the correct one sets a year-long cookie scoped to
+the page. Every response under `/<slug>`, the password form included, carries
+`X-Robots-Tag: noindex`.
+
+To add one: an entry in `PAGES` (`worker/private.ts`) naming its secret, the secret's name in
+`secrets.required` (`wrangler.jsonc`), `pnpm exec wrangler secret put <NAME>`, and the files
+uploaded with `pnpm exec wrangler r2 object put jona-private/<slug>/<path> --file <file>
+--content-type <type> --remote`. Changing a page's content is only an upload; changing its
+password is `secret put` again, which signs everyone out.
+
 ## Sharable app links
 
 The desktop is routed by the focused app: every app — built-in or embedded — is shareable at
@@ -104,8 +119,8 @@ vp preview   # serve the production build
 
 A **Cloudflare Worker** (`worker/index.ts`, config in `wrangler.jsonc`). Cloudflare serves the
 built desktop from `dist/` as static assets, unknown paths getting `index.html`; every request
-meets the Worker first, which sends the other addresses to `jona.no` and serves the embedded
-apps under `/apps/<id>/`. Every push to `main` builds and deploys it
+meets the Worker first, which sends the other addresses to `jona.no`, serves the private pages
+from R2 behind their passwords, and serves the embedded apps under `/apps/<id>/`. Every push to `main` builds and deploys it
 (`.github/workflows/deploy.yml`; repository secrets `CLOUDFLARE_API_TOKEN` and
 `CLOUDFLARE_ACCOUNT_ID`). By hand: `pnpm run deploy` after `pnpm exec wrangler login`.
 

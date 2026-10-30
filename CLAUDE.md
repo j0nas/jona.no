@@ -61,6 +61,16 @@ Times New Roman in WordPad" look lives. Author with plain headings, lists and ta
 content is ours, so the HTML is trusted and rendered as-is. Images go in
 `public/img/docs/<slug>/` and are referenced by absolute path (`/img/docs/<slug>/x.png`).
 
+## Private pages
+
+Pages for a few people only (`worker/private.ts`; README › Private pages). **Their content
+never goes in this repo — it is public.** The files live in the `jona-private` R2 bucket under
+`<slug>/` and are uploaded from wherever the page is made; this repo holds only the `PAGES`
+entry, which names the page's password secret, and that name in `secrets.required`
+(`wrangler.jsonc`). `wrangler deploy` refuses to run while a required secret is unset, so set it
+(`wrangler secret put`) before pushing a new page. A private slug takes `/<slug>` away from the
+desktop's own routes, so it must not be an app id.
+
 ## Sharable links (desktop routing)
 
 `src/components/desktop/route.ts` routes the desktop by the focused window: every app —
