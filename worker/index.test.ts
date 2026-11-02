@@ -22,7 +22,10 @@ const bucket = {
       json: async () => JSON.parse(files[key]),
     };
   }),
-  put: vi.fn(async (key: string, value: string) => void (files[key] = value)),
+  put: vi.fn(async (key: string, value: string) => {
+    files[key] = value;
+    return { key };
+  }),
   delete: vi.fn(async (key: string) => void delete files[key]),
   list: vi.fn(async ({ prefix }: { prefix: string }) => ({
     objects: Object.keys(files)
@@ -45,7 +48,9 @@ afterEach(() => {
   assets.mockClear();
   bucket.get.mockClear();
   bucket.put.mockClear();
-  for (const key of Object.keys(files)) if (key.startsWith("_feedback/")) delete files[key];
+  for (const key of Object.keys(files)) {
+    if (/^(_feedback\/|_edits\/|pilestredet\/img\/u-)/.test(key)) delete files[key];
+  }
 });
 
 describe("addresses", () => {
@@ -205,7 +210,7 @@ describe("a private page's review password", () => {
     const res = await get(url, { method: "POST", body: new URLSearchParams({ password }) });
     return res.headers.get("set-cookie")!.split(";")[0];
   };
-  const LAYER = "/private/feedback.js";
+  const LAYER = "/private/review.js";
 
   test("opens the same page with the comment layer; the old password still opens it without", async () => {
     const review = await get("https://jona.no/pilestredet/", {
@@ -303,5 +308,91 @@ describe("feedback notes", () => {
     expect((await reviewer("/%E0%A4%A", put(note))).status).toBe(404);
     await reviewer("/n1", put(note));
     expect((await reviewer("/n1", { method: "PATCH", body: '{"status":"x"}' })).status).toBe(400);
+  });
+});
+
+describe("edits", () => {
+  const api = "https://jona.no/pilestredet/_edits";
+  const as = async (password: string) => {
+    const login = await get("https://jona.no/pilestredet/", {
+      method: "POST",
+      body: new URLSearchParams({ password }),
+    });
+    const cookie = login.headers.get("set-cookie")!.split(";")[0];
+    return (path: string, init: RequestInit = {}) =>
+      get(`${api}${path}`, { ...init, headers: { cookie, ...init.headers } });
+  };
+  const post = (body: unknown) => ({ method: "POST", body: JSON.stringify(body) });
+  const photo = { name: "u-abc123", w: 900, h: 600, wl: 2000 };
+  const jpeg = (...bytes: number[]) =>
+    new Uint8Array([0xff, 0xd8, 0xff, 0xe0, ...bytes, 0xff, 0xd9]);
+
+  test("are only for the review password", async () => {
+    const viewer = await as("hemmelig");
+    expect((await viewer("")).status).toBe(404);
+    expect((await viewer("", post({ kind: "remove", target: "small/1" }))).status).toBe(404);
+    expect((await viewer("/img/u-abc123-s.jpg", { method: "PUT", body: jpeg() })).status).toBe(404);
+  });
+
+  test("are logged in order, and can be taken back", async () => {
+    const editor = await as("kommenter");
+    const res = await editor(
+      "",
+      post({ kind: "text", target: "title", text: " Pilestredet\n63 C ", before: "x" }),
+    );
+    const { edit } = await res.json<{ edit: { id: string; text: string; status: string } }>();
+    expect([edit.text, edit.status]).toEqual(["Pilestredet 63 C", "live"]);
+    await editor("", post({ kind: "remove", target: "small/1" }));
+
+    expect(
+      (await editor(`/${edit.id}`, { method: "PATCH", body: '{"status":"undone"}' })).status,
+    ).toBe(200);
+    const log = await (await editor("")).json<{ kind: string; status: string }[]>();
+    expect(log.map((e) => [e.kind, e.status])).toEqual([
+      ["text", "undone"],
+      ["remove", "live"],
+    ]);
+  });
+
+  test("answer with the HTML they add, its text escaped", async () => {
+    const editor = await as("kommenter");
+    const p = await editor(
+      "",
+      post({ kind: "insert", after: "job/vinduene/p0", block: { type: "p", text: "<b>&" } }),
+    );
+    const { edit, html } = await p.json<{ edit: { id: string }; html: string }>();
+    expect(html).toBe(`<p data-edit="new/${edit.id}" data-edit-kind="p">&#60;b&#62;&#38;</p>`);
+
+    const swap = await editor("", post({ kind: "photo", target: "hero/0", photo, media: "img" }));
+    expect((await swap.json<{ html: string }>()).html).toMatch(
+      /^<img data-edit="hero\/0\/photo" src="img\/u-abc123-s.jpg" srcset="img\/u-abc123-s.jpg 900w, img\/u-abc123-l.jpg 2000w"/,
+    );
+  });
+
+  test("turn down what isn't an edit", async () => {
+    const editor = await as("kommenter");
+    for (const body of [
+      { kind: "text", target: "../x", text: "a" },
+      { kind: "photo", target: "hero/0", photo: { ...photo, name: "../evil" } },
+      { kind: "insert", after: "small/1", block: { type: "p", text: " " } },
+      { kind: "insert", after: "small/1", block: { type: "script", text: "a" } },
+      { kind: "nope" },
+    ]) {
+      expect((await editor("", post(body))).status).toBe(400);
+    }
+    expect((await editor("/x", { method: "PATCH", body: '{"status":"live"}' })).status).toBe(404);
+  });
+
+  test("take photos as metadata-free JPEGs, into the page's folder", async () => {
+    const editor = await as("kommenter");
+    const put = (name: string, body: Uint8Array) => editor(`/img/${name}`, { method: "PUT", body });
+    expect((await put("u-abc123-s.jpg", jpeg(1, 2, 3))).status).toBe(200);
+    expect(files["pilestredet/img/u-abc123-s.jpg"]).toBeDefined();
+    // "Exif\0\0": a photo straight off a phone, with where it was taken.
+    expect((await put("u-abc123-l.jpg", jpeg(0x45, 0x78, 0x69, 0x66, 0, 0))).status).toBe(400);
+    expect((await put("u-abc123-l.jpg", new Uint8Array([0x89, 0x50, 0x4e, 0x47]))).status).toBe(
+      400,
+    );
+    expect((await put("index.html", jpeg())).status).toBe(400);
   });
 });

@@ -96,13 +96,16 @@ uploaded with `pnpm exec wrangler r2 object put jona-private/<slug>/<path> --fil
 password is `secret put` again, which signs everyone out.
 
 A page can also have a review password, for someone giving feedback on it: `review` in its
-`PAGES` entry names a second secret. That password opens the same page with a comment layer on
-top (`public/private/feedback.js`), Agentation's toolbar on a computer and a "Kommenter" tab on a
-phone. Each note is sent as it's written and kept in the bucket at `_feedback/<slug>/<id>.json`,
-outside the page's folder. Whoever makes the page reads the notes back and marks them done at
-`/<slug>/_feedback` with the same password (`worker/feedback.ts`). The first password still
-opens the page without the layer. Someone already signed in can switch at `/<slug>/?logg-inn`,
-which shows the password form again.
+`PAGES` entry names a second secret. That password opens the same page with a review layer on
+top (`public/private/`), a tab on the right edge with two modes. "Kommenter" leaves a note for
+whoever makes the page, kept in the bucket at `_feedback/<slug>/<id>.json` and read back at
+`/<slug>/_feedback` (`worker/feedback.ts`). "Rediger" edits the page in place: the reviewer taps
+a text to change it, adds or removes paragraphs and list items, and replaces, adds or removes
+photos from their phone. The page marks what can be edited with `data-edit` ids; the edits are a
+log at `_edits/<slug>.json` that the Worker applies to the page for everyone as it's served,
+until they're folded into the page's source (`worker/edits.ts`). The first password still opens
+the page without the layer. Someone already signed in can switch at `/<slug>/?logg-inn`, which
+shows the password form again.
 
 ## Sharable app links
 

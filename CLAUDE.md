@@ -72,11 +72,21 @@ entry, which names the page's password secret, and that name in `secrets.require
 desktop's own routes, so it must not be an app id.
 
 A page can have a second, review password (`review` in its `PAGES` entry, a secret of its own).
-It opens the same page with a comment layer added to the HTML (`public/private/feedback.js`:
-Agentation on a computer, a "Kommenter" tab on a phone). Notes go to `/<slug>/_feedback`
-(`worker/feedback.ts`), which keeps them in the bucket under `_feedback/<slug>/`, outside the
-page's folder. Only the review password reaches that endpoint, for writing and for reading back.
-The layer's own copy of the page carries no etag, so it never mixes with a viewer's cached copy.
+It opens the same page with a review layer added to the HTML (`public/private/review.js`): a tab
+on the right edge with two modes, the same on a phone and a computer.
+
+- **Kommenter** leaves a note for whoever makes the page. Notes go to `/<slug>/_feedback`
+  (`worker/feedback.ts`), kept in the bucket under `_feedback/<slug>/`, outside the page's folder.
+- **Rediger** changes the page in place: text edited, paragraphs, list items and photos added,
+  removed or replaced. Edits go to `/<slug>/_edits` (`worker/edits.ts`), a log in the bucket at
+  `_edits/<slug>.json`, and are applied to the page for every visitor as it's served (an
+  `HTMLRewriter` keyed on the page's `data-edit` ids) until the page's maker folds them into the
+  page's source and marks them folded. Uploaded photos land in the page's own `img/` folder,
+  re-encoded in the browser (no metadata; the Worker refuses a JPEG with an Exif block).
+
+Only the review password reaches either endpoint. A page's HTML is put together on each request
+(file, edits, layer), so it is served `no-store` with no etag. `applyEdits` needs the Workers
+runtime, so the unit tests stop at the API; check the rewriting under `wrangler dev`.
 
 ## Sharable links (desktop routing)
 

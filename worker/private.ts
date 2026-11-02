@@ -1,3 +1,4 @@
+import { applyEdits, edits, liveEdits } from "./edits";
 import { feedback, ID } from "./feedback";
 
 /**
@@ -5,14 +6,15 @@ import { feedback, ID } from "./feedback";
  * the PRIVATE R2 bucket under "<slug>/" (uploaded from wherever the page is made, never committed
  * here) and are served at /<slug>/ to whoever has its password, a Worker secret. Every response
  * under /<slug> says noindex, the password form included. A page can have a second password
- * (`review`) that opens it with a comment layer on top, for someone giving feedback on it.
+ * (`review`) for someone giving feedback on it, who can comment on it and edit it in place.
  */
 export interface PrivatePage {
   /** The Worker secret holding the page's password (listed in wrangler.jsonc's `secrets`). */
   password: Secret;
   /**
    * A second password, for someone giving feedback on the page: it opens the same page with a
-   * comment layer on it (public/private/feedback.js), whose notes are kept by worker/feedback.ts.
+   * layer on it (public/private/review.js) for leaving notes (worker/feedback.ts) and editing the
+   * page in place (worker/edits.ts). Edits show for everyone; notes only reach the page's maker.
    */
   review?: Secret;
 }
@@ -28,7 +30,7 @@ type Role = "view" | "review";
 const NOINDEX = "noindex, nofollow, noarchive";
 /** `?logg-inn` shows the password form even when signed in, to switch to the other password. */
 const LOGIN = "logg-inn";
-const LAYER = '<script type="module" src="/private/feedback.js"></script>';
+const LAYER = '<script type="module" src="/private/review.js"></script>';
 
 export async function privatePage(
   req: Request,
@@ -58,6 +60,11 @@ export async function privatePage(
     if (role !== "review" || (id !== undefined && !ID.test(id))) return text(404, "Finnes ikke.");
     return feedback(req, env.PRIVATE, slug, id);
   }
+  const editing = /^\/_edits(\/.*)?$/.exec(rest);
+  if (editing) {
+    if (role !== "review") return text(404, "Finnes ikke.");
+    return edits(req, env.PRIVATE, slug, editing[1] ?? "");
+  }
 
   if (req.method === "POST") {
     const tried = (await req.formData()).get("password");
@@ -78,20 +85,24 @@ export async function privatePage(
   if (url.searchParams.has(LOGIN)) return form(200, false);
 
   const key = slug + (rest.endsWith("/") ? `${rest}index.html` : rest);
-  if (role === "review" && key.endsWith(".html")) {
-    // The comment layer goes into the page itself. This copy carries no etag and is never
-    // cached, so neither it nor a viewer's cached copy is ever served in the other's place.
-    const obj = await env.PRIVATE.get(key);
+  if (key.endsWith(".html")) {
+    // A page is put together as it's served: the uploaded file, the edits made since (for
+    // everyone), and the review layer (for the reviewer). So it's never cached, and the reviewer's
+    // copy and a viewer's are never served in each other's place.
+    const [obj, state] = await Promise.all([env.PRIVATE.get(key), liveEdits(env.PRIVATE, slug)]);
     if (!obj) return text(404, "Finnes ikke.");
     const headers = new Headers({ "x-robots-tag": NOINDEX, "cache-control": "private, no-store" });
     obj.writeHttpMetadata(headers);
-    return new Response(withLayer(await obj.text()), { headers });
+    const res = new Response(role === "review" ? withLayer(await obj.text()) : obj.body, {
+      headers,
+    });
+    return state ? applyEdits(res, state) : res;
   }
   const obj = await env.PRIVATE.get(key, { onlyIf: req.headers, range: req.headers });
   if (!obj) return text(404, "Finnes ikke.");
   const headers = new Headers({
     "x-robots-tag": NOINDEX,
-    "cache-control": key.endsWith(".html") ? "private, no-cache" : "private, max-age=86400",
+    "cache-control": "private, max-age=86400",
     "accept-ranges": "bytes",
     etag: obj.httpEtag,
   });
