@@ -71,6 +71,13 @@ entry, which names the page's password secret, and that name in `secrets.require
 (`wrangler secret put`) before pushing a new page. A private slug takes `/<slug>` away from the
 desktop's own routes, so it must not be an app id.
 
+A page can have a second, review password (`review` in its `PAGES` entry, a secret of its own).
+It opens the same page with a comment layer added to the HTML (`public/private/feedback.js`:
+Agentation on a computer, a "Kommenter" tab on a phone). Notes go to `/<slug>/_feedback`
+(`worker/feedback.ts`), which keeps them in the bucket under `_feedback/<slug>/`, outside the
+page's folder. Only the review password reaches that endpoint, for writing and for reading back.
+The layer's own copy of the page carries no etag, so it never mixes with a viewer's cached copy.
+
 ## Sharable links (desktop routing)
 
 `src/components/desktop/route.ts` routes the desktop by the focused window: every app —

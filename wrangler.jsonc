@@ -22,7 +22,7 @@
   },
   // Private pages' files (worker/private.ts), kept out of this public repo.
   "r2_buckets": [{ "binding": "PRIVATE", "bucket_name": "jona-private" }],
-  // Each private page's password (worker/private.ts). `wrangler types` takes the names from here.
-  "secrets": { "required": ["PILESTREDET_PASSWORD"] },
+  // Each private page's passwords (worker/private.ts). `wrangler types` takes the names from here.
+  "secrets": { "required": ["PILESTREDET_PASSWORD", "PILESTREDET_REVIEW_PASSWORD"] },
   "observability": { "enabled": true },
 }

@@ -18,13 +18,24 @@ const bucket = {
       range: { offset, length: end - offset + 1, suffix: undefined },
       httpEtag: '"e"',
       writeHttpMetadata: (h: Headers) => h.set("content-type", "text/html"),
+      text: async () => files[key],
+      json: async () => JSON.parse(files[key]),
     };
   }),
+  put: vi.fn(async (key: string, value: string) => void (files[key] = value)),
+  delete: vi.fn(async (key: string) => void delete files[key]),
+  list: vi.fn(async ({ prefix }: { prefix: string }) => ({
+    objects: Object.keys(files)
+      .filter((key) => key.startsWith(prefix))
+      .map((key) => ({ key })),
+    truncated: false,
+  })),
 };
 const env = {
   ASSETS: { fetch: assets },
   PRIVATE: bucket,
   PILESTREDET_PASSWORD: "hemmelig",
+  PILESTREDET_REVIEW_PASSWORD: "kommenter",
 } as unknown as Env;
 const get = (url: string, init?: RequestInit, e = env) =>
   worker.fetch(new Request(url, init) as never, e);
@@ -33,6 +44,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
   assets.mockClear();
   bucket.get.mockClear();
+  bucket.put.mockClear();
+  for (const key of Object.keys(files)) if (key.startsWith("_feedback/")) delete files[key];
 });
 
 describe("addresses", () => {
@@ -184,5 +197,111 @@ describe("private pages", () => {
       );
       expect([res.status, res.headers.get("set-cookie")]).toEqual([404, null]);
     }
+  });
+});
+
+describe("a private page's review password", () => {
+  const cookieFor = async (password: string, url = "https://jona.no/pilestredet/") => {
+    const res = await get(url, { method: "POST", body: new URLSearchParams({ password }) });
+    return res.headers.get("set-cookie")!.split(";")[0];
+  };
+  const LAYER = "/private/feedback.js";
+
+  test("opens the same page with the comment layer; the old password still opens it without", async () => {
+    const review = await get("https://jona.no/pilestredet/", {
+      headers: { cookie: await cookieFor("kommenter") },
+    });
+    expect(review.status).toBe(200);
+    expect(await review.text()).toBe(
+      `<h1>før og etter</h1><script type="module" src="${LAYER}"></script>`,
+    );
+    // Never cached, and never matched against a viewer's cached copy.
+    expect([review.headers.get("etag"), review.headers.get("cache-control")]).toEqual([
+      null,
+      "private, no-store",
+    ]);
+
+    const view = await get("https://jona.no/pilestredet/", {
+      headers: { cookie: await cookieFor("hemmelig") },
+    });
+    expect(await view.text()).not.toContain(LAYER);
+    expect(await cookieFor("hemmelig")).not.toBe(await cookieFor("kommenter"));
+  });
+
+  test("?logg-inn shows the form to someone signed in, and is dropped after signing in", async () => {
+    const cookie = await cookieFor("hemmelig");
+    const res = await get("https://jona.no/pilestredet/?logg-inn", { headers: { cookie } });
+    expect([res.status, (await res.text()).includes('type="password"')]).toEqual([200, true]);
+
+    const signedIn = await get("https://jona.no/pilestredet/?logg-inn&x=1", {
+      method: "POST",
+      body: new URLSearchParams({ password: "kommenter" }),
+    });
+    expect(signedIn.headers.get("location")).toBe("/pilestredet/?x=1");
+  });
+
+  test("an unset review password opens nothing", async () => {
+    const unset = { ...env, PILESTREDET_REVIEW_PASSWORD: undefined } as unknown as Env;
+    for (const password of ["", "undefined"]) {
+      const res = await get(
+        "https://jona.no/pilestredet/",
+        { method: "POST", body: new URLSearchParams({ password }) },
+        unset,
+      );
+      expect([res.status, res.headers.get("set-cookie")]).toEqual([401, null]);
+    }
+  });
+});
+
+describe("feedback notes", () => {
+  const api = "https://jona.no/pilestredet/_feedback";
+  const as = async (password: string) => {
+    const login = await get("https://jona.no/pilestredet/", {
+      method: "POST",
+      body: new URLSearchParams({ password }),
+    });
+    const cookie = login.headers.get("set-cookie")!.split(";")[0];
+    return (path: string, init: RequestInit = {}) =>
+      get(`${api}${path}`, { ...init, headers: { cookie, ...init.headers } });
+  };
+  const note = { comment: "Feil dato", element: "img", page: "/pilestredet/", source: "tap" };
+  const put = (body: unknown) => ({ method: "PUT", body: JSON.stringify(body) });
+
+  test("are only for the review password", async () => {
+    const viewer = await as("hemmelig");
+    expect((await viewer("")).status).toBe(404);
+    expect((await viewer("/n1", put(note))).status).toBe(404);
+    expect((await get(`${api}/n1`, put(note))).status).toBe(404);
+    expect(bucket.put).not.toHaveBeenCalled();
+  });
+
+  test("are kept outside the page's folder, edited in place and marked done", async () => {
+    const reviewer = await as("kommenter");
+    expect((await reviewer("/n1", put(note))).status).toBe(200);
+    expect(Object.keys(files)).toContain("_feedback/pilestredet/n1.json");
+
+    await reviewer("/n1", put({ ...note, comment: "Feil dato, skal være 2." }));
+    expect((await reviewer("/n1", { method: "PATCH", body: '{"status":"resolved"}' })).status).toBe(
+      200,
+    );
+    const [saved] = await (await reviewer("")).json<{ comment: string; status: string }[]>();
+    expect([saved.comment, saved.status]).toEqual(["Feil dato, skal være 2.", "resolved"]);
+
+    // Taking a note back only works while it's open.
+    await reviewer("/n1", { method: "DELETE" });
+    expect(await (await reviewer("")).json()).toHaveLength(1);
+    await reviewer("/n2", put(note));
+    await reviewer("/n2", { method: "DELETE" });
+    expect(await (await reviewer("")).json()).toHaveLength(1);
+  });
+
+  test("turn down empty notes, bad ids and bad statuses", async () => {
+    const reviewer = await as("kommenter");
+    expect((await reviewer("/n1", put({ ...note, comment: " " }))).status).toBe(400);
+    expect((await reviewer("/n1", put("x"))).status).toBe(400);
+    expect((await reviewer("/a.b", put(note))).status).toBe(404);
+    expect((await reviewer("/%E0%A4%A", put(note))).status).toBe(404);
+    await reviewer("/n1", put(note));
+    expect((await reviewer("/n1", { method: "PATCH", body: '{"status":"x"}' })).status).toBe(400);
   });
 });
