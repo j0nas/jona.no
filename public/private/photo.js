@@ -54,8 +54,34 @@ async function jpeg(bitmap, edge) {
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(bitmap, 0, 0, w, h);
-  const blob = await new Promise((resolve, reject) =>
+  const encoded = await new Promise((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("encode"))), "image/jpeg", 0.82),
   );
-  return { blob, w, h };
+  const bytes = withoutExif(new Uint8Array(await encoded.arrayBuffer()));
+  return { blob: new Blob([bytes], { type: "image/jpeg" }), w, h };
+}
+
+const EXIF = [0x45, 0x78, 0x69, 0x66, 0, 0]; // "Exif\0\0"
+
+// Safari's encoder writes a small Exif block (colour space and pixel size, no location) into
+// every JPEG a canvas makes, and the Worker refuses any JPEG that has one, so it's cut out.
+function withoutExif(b) {
+  if (b[0] !== 0xff || b[1] !== 0xd8) return b;
+  const keep = [b.subarray(0, 2)];
+  let i = 2;
+  // Segments up to the start of scan; after it comes the image data.
+  while (i + 4 <= b.length && b[i] === 0xff && b[i + 1] !== 0xda) {
+    const end = i + 2 + ((b[i + 2] << 8) | b[i + 3]);
+    const exif = b[i + 1] === 0xe1 && EXIF.every((v, k) => b[i + 4 + k] === v);
+    if (!exif) keep.push(b.subarray(i, end));
+    i = end;
+  }
+  keep.push(b.subarray(i));
+  const out = new Uint8Array(keep.reduce((n, p) => n + p.length, 0));
+  let at = 0;
+  for (const p of keep) {
+    out.set(p, at);
+    at += p.length;
+  }
+  return out;
 }
