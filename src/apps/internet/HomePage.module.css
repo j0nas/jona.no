@@ -59,7 +59,7 @@
 /* The CSS stand-in for <marquee>: the text crosses the column from edge to edge. */
 .marquee {
   overflow: hidden;
-  border: 2px ridge #c0c0c0;
+  border: 2px outset #c0c0c0;
   background: #000080;
   color: #00ff00;
   font-family: "Courier New", Courier, monospace;
@@ -105,19 +105,16 @@
   font-size: 2.3em;
   font-weight: 700;
   line-height: 1.1;
-  text-shadow:
-    2px 2px 0 #ff0000,
-    4px 4px 0 #800080;
 }
 
 .welcome img {
   flex: 0 0 auto;
 }
 
-/* A <table border=4 bgcolor=navy> around the words that matter. */
+/* A <table border=4 bgcolor=navy> around the words that matter, with a table's raised bevel. */
 .bio {
   padding: 2px 12px;
-  border: 4px ridge #c0c0c0;
+  border: 4px outset #c0c0c0;
   background: #000080;
   text-align: left;
 }
@@ -180,7 +177,7 @@
   gap: 16px;
 }
 
-/* The odometer: white digits on black wheels, split by a seam across the middle. */
+/* A CGI counter's digits: white on black, one GIF apiece. */
 .counter {
   color: #ffffff;
 }
@@ -196,7 +193,7 @@
 
 .digit {
   width: 0.85em;
-  background: linear-gradient(#333333, #000000 45%, #555555 50%, #000000 55%, #333333);
+  background: #000000;
   color: #ffffff;
   font-family: "Courier New", Courier, monospace;
   font-weight: 700;
