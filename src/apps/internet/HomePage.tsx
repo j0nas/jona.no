@@ -7,7 +7,7 @@ import styles from "./HomePage.module.css";
 const MARQUEE_TEXT = "Welcome to my corner of the information superhighway!";
 const LAST_UPDATED = "November 6, 1996";
 
-export const CONTACT_EMAIL = "jonas.jensen@msn.com";
+export const CONTACT_EMAIL = "hi@jona.no";
 
 const BADGES = [
   { src: "badge-msexplorer.gif", alt: "Explorer Now! 3.0" },

@@ -48,7 +48,7 @@ const DESKTOP_ICONS: { id: string; appId: AppId; label: string }[] = [
 
 const NOTEPAD_CONTENT = `Hi, I'm Jonas. I'm a software developer based in Oslo, Norway. I'm super passionate about computers, technology, animal rights and tinkering.
 
-I love to use my skills to make people's lives better in whatever ways I can and to build things that do so. If you do too, feel free to reach out at: jonas.jensen@msn.com`;
+I love to use my skills to make people's lives better in whatever ways I can and to build things that do so. If you do too, feel free to reach out at: hi@jona.no`;
 
 // Each open window's live state — an app or a document (see WindowId). Position
 // is fixed at spawn; the window owns its own dragging after that.
