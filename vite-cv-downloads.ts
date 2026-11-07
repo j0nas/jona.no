@@ -55,6 +55,11 @@ export function cvDownloads(): Plugin {
   };
   return {
     name: "cv-downloads",
+    // The desktop needs JavaScript, so what a plain fetch of /cv finds is this.
+    transformIndexHtml(html) {
+      const children = `This site is a Windows 95 desktop and needs JavaScript. The CV is at /${CV_FILE}.pdf. ${EASTER_EGG}`;
+      return { html, tags: [{ tag: "noscript", children, injectTo: "body" }] };
+    },
     configureServer(server) {
       server.middlewares.use(middleware);
     },

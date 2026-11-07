@@ -16,12 +16,19 @@ export interface Profile {
   url?: string;
 }
 
+/** A row of the tl;dr. Not in JSON Resume's schema, which leaves basics open to more fields. */
+export interface Fact {
+  label?: string;
+  text?: string;
+}
+
 export interface Basics {
   name?: string;
   label?: string;
   email?: string;
   phone?: string;
   url?: string;
+  tldr?: Fact[];
   summary?: string;
   location?: Location;
   profiles?: Profile[];
@@ -54,6 +61,10 @@ export interface Certificate {
   issuer?: string;
   url?: string;
 }
+
+export type Credential =
+  | { school: Education; certificate?: undefined }
+  | { certificate: Certificate; school?: undefined };
 
 export interface Skill {
   name?: string;
@@ -106,6 +117,7 @@ export function formatDate(date: string): string {
  * nobody wrote down when it finished.
  */
 export function dateRange(start?: string, end?: string, open = true): string {
+  if (start && start === end) return formatDate(start);
   if (start && end) return `${formatDate(start)} – ${formatDate(end)}`;
   if (start) return open ? `${formatDate(start)} – present` : formatDate(start);
   return end ? formatDate(end) : "";
@@ -117,6 +129,26 @@ export function displayUrl(url: string): string {
     .replace(/^https?:\/\//, "")
     .replace(/^www\./, "")
     .replace(/\/$/, "");
+}
+
+/** A run of text, a link if it has an address. */
+export interface Inline {
+  text: string;
+  href?: string;
+  bold?: boolean;
+}
+
+/** Text with Markdown links in it, the one markup resume.json's strings can hold, as runs. */
+export function inlineRuns(text: string): Inline[] {
+  const runs: Inline[] = [];
+  let at = 0;
+  for (const match of text.matchAll(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g)) {
+    if (match.index > at) runs.push({ text: text.slice(at, match.index) });
+    runs.push({ text: match[1], href: match[2] });
+    at = match.index + match[0].length;
+  }
+  if (at < text.length) runs.push({ text: text.slice(at) });
+  return runs;
 }
 
 /** "Oslo, Norway", from the parts JSON Resume splits a location into. */
@@ -178,6 +210,16 @@ export function schoolStudy({ studyType, area }: Education): string {
   return studyType && area?.includes(studyType)
     ? area
     : [studyType, area].filter(Boolean).join(", ");
+}
+
+/** Schools and certificates in one list, newest first; ISO dates sort as text, and undated go last. */
+export function credentials({ education = [], certificates = [] }: Resume): Credential[] {
+  const dated = (item: Credential) =>
+    (item.school ? (item.school.endDate ?? item.school.startDate) : item.certificate.date) ?? "";
+  return [
+    ...education.map((school) => ({ school })),
+    ...certificates.map((certificate) => ({ certificate })),
+  ].sort((a, b) => dated(b).localeCompare(dated(a)));
 }
 
 /** What a project's title row has flush right: its address, unless the title already is that. */

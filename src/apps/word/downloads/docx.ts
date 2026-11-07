@@ -97,6 +97,16 @@ function paragraph(item: Item, before: number, keepNext: boolean): Paragraph {
       });
     case "skill":
       return new Paragraph({ ...options, style: "Skill", children: runs(item.runs) });
+    case "fact":
+      return new Paragraph({
+        ...options,
+        style: "Fact",
+        tabStops: [{ type: TabStopType.LEFT, position: pt(60) }],
+        children: [
+          new TextRun({ children: [item.label, new Tab()], font: SANS, size: 18, bold: true }),
+          ...runs(item.runs),
+        ],
+      });
     case "note":
       return new Paragraph({ ...options, style: "Note", children: [new TextRun(item.text)] });
     case "bullet":
@@ -104,7 +114,7 @@ function paragraph(item: Item, before: number, keepNext: boolean): Paragraph {
         ...options,
         style: "ListBullet",
         numbering: { reference: "cv-bullets", level: 0 },
-        children: [new TextRun(item.text)],
+        children: runs(item.runs),
       });
   }
 }
@@ -142,17 +152,17 @@ export async function buildDocx(resume: Resume): Promise<Buffer> {
   }
 
   // Hidden text (w:vanish): invisible in Word, still in the file's text for anything that reads it.
+  // White too, since Quick Look and TextEdit ignore w:vanish.
   children.push(
     new Paragraph({
       spacing: { before: 0, after: 0 },
-      children: [new TextRun({ text: EASTER_EGG, vanish: true, size: 2 })],
+      children: [new TextRun({ text: EASTER_EGG, vanish: true, size: 2, color: "FFFFFF" })],
     }),
   );
 
   const doc = new Document({
     creator: model.name ?? "Jonas Jensen",
     title: `${model.name ?? "Jonas Jensen"} CV`,
-    subject: EASTER_EGG,
     // Word works out the total itself; this writes it into the file for viewers that don't.
     pageNumbers: estimatePageNumbers,
     styles: {
@@ -255,6 +265,15 @@ export async function buildDocx(resume: Resume): Promise<Buffer> {
           name: "Skill",
           basedOn: "Normal",
           paragraph: { spacing: { before: 0, after: 0, line: 320, lineRule: LineRuleType.EXACT } },
+        },
+        {
+          id: "Fact",
+          name: "Fact",
+          basedOn: "Normal",
+          paragraph: {
+            spacing: { before: 0, after: 0 },
+            indent: { left: pt(60), hanging: pt(60) },
+          },
         },
         {
           id: "ListBullet",

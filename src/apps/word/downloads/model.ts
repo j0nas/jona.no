@@ -1,5 +1,6 @@
 import {
   GAP,
+  credentials,
   dateRange,
   displayUrl,
   footerLabel,
@@ -7,9 +8,11 @@ import {
   formatLocation,
   groupByEmployer,
   highlightGroups,
+  inlineRuns,
   languageList,
   projectRight,
   schoolStudy,
+  type Inline,
   type Resume,
 } from "../resumeData";
 
@@ -17,11 +20,7 @@ import {
 // together on a page, is decided here, once, from the same helpers the on-screen document
 // (Resume.tsx) uses; how it looks is up to the builder.
 
-export interface Inline {
-  text: string;
-  href?: string;
-  bold?: boolean;
-}
+export type { Inline };
 
 /** A line of a block, `before` points below the line above it there. */
 export type Item = { before?: number } & (
@@ -37,9 +36,11 @@ export type Item = { before?: number } & (
   | { kind: "row"; runs: Inline[]; right?: string }
   /** A row of the skills, set a little tighter. */
   | { kind: "skill"; runs: Inline[] }
+  /** A row of the tl;dr: a small bold sans label, and what it says beside it. */
+  | { kind: "fact"; label: string; runs: Inline[] }
   /** A small italic line. */
   | { kind: "note"; text: string }
-  | { kind: "bullet"; text: string }
+  | { kind: "bullet"; runs: Inline[] }
 );
 
 /** Lines that stay whole on a page, and the points of space above them. */
@@ -62,12 +63,16 @@ export interface CvModel {
   sections: Section[];
 }
 
-const plain = (text: string): Inline[] => [{ text }];
+const plain = inlineRuns;
 const link = (href: string): Inline[] => [{ text: displayUrl(href), href }];
 
 /** Bullets, the first of them `first` points below whatever comes before them in their block. */
 function bullets(texts: string[] = [], first = 0): Item[] {
-  return texts.map((text, i) => ({ kind: "bullet", text, before: i ? GAP.bullet : first }));
+  return texts.map((text, i) => ({
+    kind: "bullet",
+    runs: plain(text),
+    before: i ? GAP.bullet : first,
+  }));
 }
 
 /** "Thing, its source", the source a link if it has an address. */
@@ -97,8 +102,18 @@ export function buildModel(resume: Resume): CvModel {
     if (blocks.length) sections.push({ title, blocks });
   };
 
+  if (basics?.tldr?.length) {
+    const items = basics.tldr.map(({ label, text }, i): Item => ({
+      kind: "fact",
+      label: label ?? "",
+      runs: plain(text ?? ""),
+      before: i ? 2 : 0,
+    }));
+    add("tl;dr", [{ gap: 0, items }]);
+  }
+
   if (basics?.summary) {
-    add("Summary", [{ gap: 0, items: [{ kind: "text", runs: plain(basics.summary) }] }]);
+    add("How I work", [{ gap: 0, items: [{ kind: "text", runs: plain(basics.summary) }] }]);
   }
 
   const work: Block[] = [];
@@ -188,23 +203,25 @@ export function buildModel(resume: Resume): CvModel {
   // Short enough to stay whole on a page, and a row's a row whichever kind it is.
   const rows: Item[] = [];
   const space = () => (rows.length ? 3 : 0);
-  for (const school of resume.education ?? []) {
-    rows.push({
-      kind: "row",
-      runs: pair(schoolStudy(school), school.institution, school.url),
-      right: dateRange(school.startDate, school.endDate, false),
-      before: space(),
-    });
-    if (school.score) rows.push({ kind: "text", runs: plain(school.score) });
-    if (school.courses?.length) {
-      rows.push({ kind: "text", runs: plain(school.courses.join("; ")) });
+  for (const { school, certificate } of credentials(resume)) {
+    if (school) {
+      rows.push({
+        kind: "row",
+        runs: pair(schoolStudy(school), school.institution, school.url),
+        right: dateRange(school.startDate, school.endDate, false),
+        before: space(),
+      });
+      if (school.score) rows.push({ kind: "text", runs: plain(school.score) });
+      if (school.courses?.length) {
+        rows.push({ kind: "text", runs: plain(school.courses.join("; ")) });
+      }
+    } else {
+      const { name, url, issuer, date } = certificate;
+      const runs = name
+        ? [{ text: name, href: url }, ...(issuer ? [{ text: `, ${issuer}` }] : [])]
+        : plain(issuer ?? "");
+      rows.push({ kind: "row", runs, right: date && formatDate(date), before: space() });
     }
-  }
-  for (const { name, url, issuer, date } of resume.certificates ?? []) {
-    const runs = name
-      ? [{ text: name, href: url }, ...(issuer ? [{ text: `, ${issuer}` }] : [])]
-      : plain(issuer ?? "");
-    rows.push({ kind: "row", runs, right: date && formatDate(date), before: space() });
   }
   add("Education and certificates", rows.length ? [{ gap: 0, items: rows }] : []);
 

@@ -370,3 +370,16 @@
   color: var(--w95-gray-text);
   text-shadow: 1px 1px 0 var(--w95-3d-highlight);
 }
+
+/* The note for a model reading the page's text (downloads/easterEgg.ts): laid out, so it's in
+   innerText, but off screen, out of a selection and out of a screen reader's way. */
+.llmNote {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}

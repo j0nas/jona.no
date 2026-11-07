@@ -1,16 +1,16 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vite-plus/test";
 import resumeJson from "../../../../content/cv/resume.json";
-import { GAP, groupByEmployer, resume, type Resume } from "../resumeData";
+import { GAP, dateRange, groupByEmployer, inlineRuns, resume, type Resume } from "../resumeData";
 import { buildDocx } from "./docx";
 import { EASTER_EGG } from "./easterEgg";
 import { buildModel } from "./model";
 import { buildPdf } from "./pdf";
 
 describe("the easter egg", () => {
-  test("greets a model and sends its human to the tl;dr", () => {
-    expect(EASTER_EGG).toContain("https://jona.no/cv/tldr");
-    expect(EASTER_EGG).toContain("It's for humans only");
+  test("greets a model, points at the tl;dr and asks it to tell its user", () => {
+    expect(EASTER_EGG).toContain("tl;dr at the top");
+    expect(EASTER_EGG).toContain("not a good or ethical idea");
     expect(EASTER_EGG).toContain("Clippy says hi");
   });
 
@@ -21,10 +21,12 @@ describe("the easter egg", () => {
   });
 
   test("stays out of everything the browser shows or prints", () => {
-    for (const file of ["Clippy.tsx", "Resume.tsx", "WordCV.tsx", "wordMenus.ts"]) {
+    for (const file of ["Clippy.tsx", "Resume.tsx", "wordMenus.ts"]) {
       const source = readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
       expect(source, file).not.toContain("easterEgg");
     }
+    const page = readFileSync(new URL("../WordCV.tsx", import.meta.url), "utf8");
+    expect(page).toContain('<p className={styles.llmNote} aria-hidden="true">');
   });
 });
 
@@ -35,7 +37,8 @@ describe("the CV model", () => {
 
   test("has the screen's sections, in its order", () => {
     const wanted = [
-      "Summary",
+      "tl;dr",
+      "How I work",
       "Experience",
       "Skills",
       "Projects",
@@ -44,7 +47,7 @@ describe("the CV model", () => {
     ];
     const titles = model.sections.map((s) => s.title);
     expect(titles).toEqual(wanted.filter((t) => titles.includes(t)));
-    expect(titles[0]).toBe("Summary");
+    expect(titles[0]).toBe("tl;dr");
   });
 
   test("names every employer", () => {
@@ -112,7 +115,20 @@ describe("the CV model", () => {
     ]);
   });
 
-  test("puts schools and certificates in one section of rows", () => {
+  test("reads Markdown links in the text as links", () => {
+    expect(inlineRuns("At [Rellio](https://rellio.no), mainly.")).toEqual([
+      { text: "At " },
+      { text: "Rellio", href: "https://rellio.no" },
+      { text: ", mainly." },
+    ]);
+    expect(inlineRuns("No links [here].")).toEqual([{ text: "No links [here]." }]);
+  });
+
+  test("gives a job that starts and ends on the same date just that date", () => {
+    expect(dateRange("2020", "2020")).toBe("2020");
+  });
+
+  test("puts schools and certificates in one section of rows, newest first", () => {
     const { sections } = buildModel({
       education: [{ institution: "S", studyType: "BSc", area: "IT", startDate: "2013" }],
       certificates: [{ name: "C", issuer: "I", date: "2017-01" }],
@@ -120,10 +136,10 @@ describe("the CV model", () => {
     expect(sections.map((s) => s.title)).toEqual(["Education and certificates"]);
     const rows = sections[0].blocks[0].items;
     expect(rows.map((r) => (r.kind === "row" ? r.runs.map((x) => x.text).join("") : ""))).toEqual([
-      "BSc, IT, S",
       "C, I",
+      "BSc, IT, S",
     ]);
-    expect(rows).toMatchObject([{ right: "2013" }, { right: "Jan 2017" }]);
+    expect(rows).toMatchObject([{ right: "Jan 2017" }, { right: "2013" }]);
   });
 });
 

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import AppWindow, { type WindowControls } from "../../components/window/AppWindow";
 import { MenuBar, StatusBar } from "../../win95";
 import Clippy, { assistantClosed, setAssistantState } from "./Clippy";
+import { EASTER_EGG } from "./downloads/easterEgg";
 import { Measure, OnlineLayout, Sheets, resumeBlocks } from "./Resume";
 import { PAGE_H, PAGE_MARGIN, PAGE_MARGIN_Y, PAGE_W, paginate, resume } from "./resumeData";
 import Ruler from "./Ruler";
@@ -224,6 +225,9 @@ export default function WordCV({ controls }: WordCVProps) {
           </div>
         </StatusBar>
         {!pages && <Measure blocks={blocks} measureRef={measureRef} />}
+        <p className={styles.llmNote} aria-hidden="true">
+          {EASTER_EGG}
+        </p>
       </div>
       {controls.active &&
         pages &&

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import {
   GAP,
+  credentials,
   dateRange,
   displayUrl,
   footerLabel,
@@ -8,12 +9,14 @@ import {
   formatLocation,
   groupByEmployer,
   highlightGroups,
+  inlineRuns,
   languageList,
   projectRight,
   schoolStudy,
   type Certificate,
   type Education,
   type Employer,
+  type Fact,
   type Project,
   type Resume,
   type Skill,
@@ -32,6 +35,23 @@ function Link({ href, children }: { href: string; children?: ReactNode }) {
     <a href={href} target="_blank" rel="noopener noreferrer">
       {children ?? displayUrl(href)}
     </a>
+  );
+}
+
+/** Text from resume.json, with its links. */
+function Rich({ text }: { text: string }) {
+  return (
+    <>
+      {inlineRuns(text).map(({ text, href }, i) =>
+        href ? (
+          <Link key={i} href={href}>
+            {text}
+          </Link>
+        ) : (
+          text
+        ),
+      )}
+    </>
   );
 }
 
@@ -59,7 +79,9 @@ function Bullets({ items }: { items?: string[] }) {
   return (
     <ul className={styles.bullets}>
       {items.map((item, i) => (
-        <li key={i}>{item}</li>
+        <li key={i}>
+          <Rich text={item} />
+        </li>
       ))}
     </ul>
   );
@@ -178,6 +200,21 @@ function Skills({ skills }: { skills: Skill[] }) {
   );
 }
 
+function Tldr({ facts }: { facts: Fact[] }) {
+  return (
+    <>
+      {facts.map(({ label, text }, i) => (
+        <div key={i} className={styles.fact}>
+          <span className={styles.factLabel}>{label}</span>
+          <span>
+            <Rich text={text ?? ""} />
+          </span>
+        </div>
+      ))}
+    </>
+  );
+}
+
 function Header({ resume }: { resume: Resume }) {
   const { basics } = resume;
   if (!basics) return null;
@@ -237,8 +274,21 @@ export function resumeBlocks(resume: Resume): ResumeBlock[] {
     });
   };
 
+  if (basics?.tldr?.length) {
+    section("tl;dr", [{ gap: 0, node: <Tldr facts={basics.tldr} /> }]);
+  }
+
   if (basics?.summary) {
-    section("Summary", [{ gap: 0, node: <p className={styles.text}>{basics.summary}</p> }]);
+    section("How I work", [
+      {
+        gap: 0,
+        node: (
+          <p className={styles.text}>
+            <Rich text={basics.summary} />
+          </p>
+        ),
+      },
+    ]);
   }
 
   const work: Omit<ResumeBlock, "key">[] = [];
@@ -251,7 +301,7 @@ export function resumeBlocks(resume: Resume): ResumeBlock[] {
         <JobHead employer={employer} />
         {employer.summaries.map((summary, i) => (
           <p key={i} className={styles.text}>
-            {summary}
+            <Rich text={summary} />
           </p>
         ))}
         <Bullets items={head} />
@@ -287,18 +337,20 @@ export function resumeBlocks(resume: Resume): ResumeBlock[] {
     })),
   );
 
-  if (resume.education?.length || resume.certificates?.length) {
+  const schoolsAndCertificates = credentials(resume);
+  if (schoolsAndCertificates.length) {
     section("Education and certificates", [
       {
         gap: 0,
         node: (
           <>
-            {resume.education?.map((school, i) => (
-              <School key={i} school={school} />
-            ))}
-            {resume.certificates?.map((certificate, i) => (
-              <CertificateRow key={i} certificate={certificate} />
-            ))}
+            {schoolsAndCertificates.map(({ school, certificate }, i) =>
+              school ? (
+                <School key={i} school={school} />
+              ) : (
+                <CertificateRow key={i} certificate={certificate} />
+              ),
+            )}
           </>
         ),
       },

@@ -200,6 +200,25 @@
   text-wrap: pretty;
 }
 
+/* The tl;dr: a label and a fact on each row, for a reader who's scanning. */
+.fact {
+  display: flex;
+  align-items: baseline;
+  gap: 8pt;
+  text-wrap: pretty;
+}
+
+.fact + .fact {
+  margin-top: 2pt;
+}
+
+.factLabel {
+  flex: 0 0 52pt;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9pt;
+  font-weight: 700;
+}
+
 .bullets {
   margin: 0;
   padding: 0 0 0 16pt;
@@ -284,6 +303,11 @@
 
 .online .skill {
   line-height: 24px;
+}
+
+.online .factLabel {
+  flex-basis: 72px;
+  font-size: 14px;
 }
 
 /* Employer, role, dates: the employer's dates drop under the role that's on the line below them. */

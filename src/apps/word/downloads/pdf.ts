@@ -85,6 +85,8 @@ const s = StyleSheet.create({
   skill: { fontSize: 11, lineHeight: 16 / 11 },
   bold: { fontFamily: "Times-Bold" },
   link: { color: LINK, textDecoration: "underline" },
+  fact: { flexDirection: "row" },
+  factLabel: { width: 60, fontFamily: `${SANS}-Bold`, fontSize: 9, lineHeight: (11 * 1.3) / 9 },
   bullet: { flexDirection: "row" },
   bulletMark: { width: 16, paddingLeft: 4 },
   // White and tiny, after the last visible line: for text extractors (easterEgg.ts).
@@ -132,6 +134,13 @@ function renderItem(item: Item, i: number): ReactNode {
       return row(i, h(Text, { style: s.rowLeft }, runs(item.runs)), item.right, 0.9, { marginTop });
     case "skill":
       return h(Text, { key: i, style: s.skill }, runs(item.runs));
+    case "fact":
+      return h(
+        View,
+        { key: i, style: [s.fact, { marginTop }] },
+        h(Text, { style: s.factLabel }, item.label),
+        h(Text, { style: { flex: 1 } }, runs(item.runs)),
+      );
     case "note":
       return h(Text, { key: i, style: [s.note, { marginTop }] }, item.text);
     case "bullet":
@@ -139,7 +148,7 @@ function renderItem(item: Item, i: number): ReactNode {
         View,
         { key: i, style: [s.bullet, { marginTop }] },
         h(Text, { style: s.bulletMark }, "•"),
-        h(Text, { style: { flex: 1 } }, item.text),
+        h(Text, { style: { flex: 1 } }, runs(item.runs)),
       );
   }
 }
@@ -181,7 +190,6 @@ export async function buildPdf(resume: Resume): Promise<Buffer> {
     {
       title: `${model.name ?? "Jonas Jensen"} CV`,
       author: model.name ?? "Jonas Jensen",
-      subject: EASTER_EGG,
       creator: model.name ?? "Jonas Jensen",
       producer: model.name ?? "Jonas Jensen",
     },

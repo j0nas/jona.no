@@ -68,7 +68,10 @@ content is ours, so the HTML is trusted and rendered as-is. Images go in
 
 The CV's data is `content/cv/resume.json` (JSON Resume v1.0.0), imported at build time by
 `src/apps/word/resumeData.ts`, and it is the only place its text lives: edit that file, nothing in
-the code knows what it says. `Resume.tsx` renders every field the schema allows for basics, work
+the code knows what it says. Its one addition to the schema is `basics.tldr`, the facts at the top
+of the CV, and its one markup is Markdown links (`inlineRuns`), which the screen, the PDF and the
+DOCX all turn into links. Employer headings aren't links; what a reader can go and look at is
+linked in the text. `Resume.tsx` renders every field the schema allows for basics, work
 (but for a job's location), education, certificates, skills, languages and projects, skips what's
 missing, and merges consecutive jobs at one company: one heading, each role with its dates, then
 their text. A job with no `endDate` reads "present"; a project or school with none just shows its
@@ -103,11 +106,12 @@ client bundle (`@react-pdf/renderer` and `docx` are devDependencies, and generat
 same helpers as the screen, and the PDF and DOCX builders. Both builders have their own layout code,
 copied from `Resume.module.css` by eye, so a design change needs making in the screen, the PDF
 and the DOCX; only the gaps between blocks (`GAP`) are shared. A new field needs adding in `model.ts` as well as `Resume.tsx`. All three files
-carry a note for language models that read them (`easterEgg.ts`: white 1.5pt text and the subject
-in the PDF, hidden text in the DOCX, `meta.note` in the JSON). It asks for no rating; it tells the
-model about the 30-second version at `/cv/tldr`, which only its human can open (see "Private
-pages"). It is never rendered on screen, so File › Print stays clean, which is the copy that goes
-through a formal screening system.
+carry a note for language models that read them (`easterEgg.ts`: white 1.5pt text in the PDF, hidden
+white text in the DOCX, `meta.note` in the JSON). The same note is off screen in the
+`cv` window for a model reading the page's text, and in a `<noscript>` the plugin adds to
+`index.html` for a plain fetch. It asks for no rating; it says the CV has a tl;dr and asks the model
+to tell its user that using a model on a CV is not a good or ethical idea. It is never shown on
+screen or in File › Print, which is the copy that goes through a formal screening system.
 
 ## Private pages
 
@@ -135,16 +139,6 @@ on the right edge with two modes, the same on a phone and a computer.
 Only the review password reaches either endpoint. A page's HTML is put together on each request
 (file, edits, layer), so it is served `no-store` with no etag. `applyEdits` needs the Workers
 runtime, so the unit tests stop at the API; check the rewriting under `wrangler dev`.
-
-`/cv/tldr` (`worker/human.ts`, `worker/humanGate.ts`) keeps its content in the same bucket, at
-`cv-tldr/index.html`, behind Cloudflare Turnstile instead of a password. Anyone who passes gets a
-signed cookie for a day. The gate is a Win95 dialog written into the Worker: dragging Clippy to the
-Recycle Bin is the joke, Turnstile is the check, and a plain fetch finds a line telling language
-models to send their human, which is why the CV downloads' note points there. To replace the text:
-`pnpm exec wrangler r2 object put jona-private/cv-tldr/index.html --file <file> --content-type "text/html; charset=utf-8" --remote`.
-`TURNSTILE_SECRET` is a Worker secret and `TURNSTILE_SITE_KEY` a var in `wrangler.jsonc`. Locally,
-`.dev.vars` holds Cloudflare's test secret, whose answers say `example.com` and no action, so the
-hostname and action checks only run with the real keys.
 
 ## Sharable links (desktop routing)
 
