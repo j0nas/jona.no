@@ -241,7 +241,6 @@ Total weight 84 KB. Listed so any of them can be traced back; URLs are as archiv
 | `under-construction.gif` | `geocities.com/picklel0af/UnderConstruction.gif`                        |
 | `digger.gif`             | `geocities.com/jpdetroitusa/CONSTRUCTION_ANIMEE.gif`                    |
 | `new-burst.gif`          | `geocities.com/angeljulie2/ani-new.gif`                                 |
-| `new-small.gif`          | `geocities.com/ardharn/new.gif`                                         |
 | `divider-rainbow.gif`    | `geocities.com/orcanut2002/rainbowspiral.gif`                           |
 | `divider-lights.gif`     | `uk.geocities.com/necnld/animatedrainbowline.gif`                       |
 | `divider-arrows.gif`     | `geocities.com/sweetdaphne86/A-rainbowbar2front.gif`                    |

@@ -142,27 +142,6 @@ export default function HomePage({ onOpen }: { onOpen: (id: WindowId) => void })
 
         <Divider name="divider-arrows.gif" height={17} lazy />
 
-        <h2 className={styles.heading}>Things I've built</h2>
-        <ul className={styles.links}>
-          <li>
-            <Bullet />
-            <WindowLink id="floor-planner" onOpen={onOpen}>
-              The Floor Planner
-            </WindowLink>{" "}
-            <img src={img("new-small.gif")} alt="New!" width={30} height={15} loading="lazy" />
-          </li>
-          <li>
-            <Bullet />
-            <WindowLink id="documents" onOpen={onOpen}>
-              My Documents folder
-            </WindowLink>
-          </li>
-          <li>
-            <Bullet />
-            <ExternalLink href="https://github.com/j0nas">github.com/j0nas</ExternalLink>
-          </li>
-        </ul>
-
         <h2 className={styles.heading}>
           <img src={img("mailbox.gif")} alt="" width={50} height={50} loading="lazy" />
           Say hi!
@@ -177,6 +156,10 @@ export default function HomePage({ onOpen }: { onOpen: (id: WindowId) => void })
             <ExternalLink href="https://www.linkedin.com/in/j0nas">
               linkedin.com/in/j0nas
             </ExternalLink>
+          </li>
+          <li>
+            <Bullet />
+            <ExternalLink href="https://github.com/j0nas">github.com/j0nas</ExternalLink>
           </li>
         </ul>
         <p>
