@@ -87,6 +87,10 @@ at reading size, with no sheets, ruler or toolbars, and it still prints as the s
 Assistant (`Clippy.tsx`) sits in the gutter beside the page and stays away when that would cover
 text, as on a phone. The document's first scroll dismisses his balloon; clicking him brings it back.
 
+Review notes on the CV come through Touchup (README › Touchup). `node ../touchup/packages/cli/touchup.ts`
+lists the open ones. Each gives the exact words selected, so search for those in `resume.json`; the
+`source` line only names `Resume.tsx`.
+
 The CV is also a download: `/Jonas-Jensen-CV.pdf`, `.docx` and `.json` (JSON Resume), reached from
 Clippy's "Download this résumé" and from File › Save As, which gives the Word document. They are
 made from `resume.json` by the `cvDownloads` plugin (`vite-cv-downloads.ts`): emitted into `dist/`

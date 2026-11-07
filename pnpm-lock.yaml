@@ -39,6 +39,9 @@ importers:
       '@react-pdf/renderer':
         specifier: ^4.9.0
         version: 4.9.0(react@19.3.1)
+      '@touchup/vite':
+        specifier: 0.1.0
+        version: 0.1.0(@voidzero-dev/vite-plus-core@1.3.0(@types/node@26.6.5)(esbuild@0.28.2)(typescript@7.0.2))
       '@types/node':
         specifier: ^26.6.5
         version: 26.6.5
@@ -839,6 +842,11 @@ packages:
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
 
+  '@touchup/vite@0.1.0':
+    resolution: {integrity: sha512-o7+YwVZvvkoaNr93KqiYnpxKeH6ABQM/v6uGTJvqRPkb3UjFfm1xARliD2p4aFIKlH+4vH1ymoUhrUOYa64K4Q==}
+    peerDependencies:
+      vite: ^8.0.0
+
   '@types/aria-query@5.0.4':
     resolution: {integrity: sha512-rfT93uj5s0PRL7EzccGMs3brplhcrghnDoV26NqKhCAS1hVo+WdNsPvE/yb6ilfr5hi2MEk6d5EWJTKdxg8jVw==}
 
@@ -1467,6 +1475,9 @@ packages:
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
+
+  magic-string@0.30.21:
+    resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
   magic-string@1.4.3:
     resolution: {integrity: sha512-z12OxmaPGE0F4xlpGdjuAUckipLpQlTAuAmyGhNoD7ODpYUzvDfvtxUbjM/jwznyP178oju/KDdyi220wNJ0RQ==}
@@ -2342,6 +2353,11 @@ snapshots:
     dependencies:
       '@testing-library/dom': 10.4.2
 
+  '@touchup/vite@0.1.0(@voidzero-dev/vite-plus-core@1.3.0(@types/node@26.6.5)(esbuild@0.28.2)(typescript@7.0.2))':
+    dependencies:
+      magic-string: 0.30.21
+      vite: '@voidzero-dev/vite-plus-core@1.3.0(@types/node@26.6.5)(esbuild@0.28.2)(typescript@7.0.2)'
+
   '@types/aria-query@5.0.4': {}
 
   '@types/chai@5.2.3':
@@ -2786,6 +2802,10 @@ snapshots:
       js-tokens: 4.0.0
 
   lz-string@1.5.0: {}
+
+  magic-string@0.30.21:
+    dependencies:
+      '@jridgewell/sourcemap-codec': 1.6.0
 
   magic-string@1.4.3:
     dependencies:

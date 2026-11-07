@@ -1,5 +1,6 @@
 import { defineConfig } from "vite-plus";
 import react from "@vitejs/plugin-react";
+import { touchupSource } from "@touchup/vite";
 import { APPS } from "./worker/apps";
 import { cvDownloads } from "./vite-cv-downloads";
 
@@ -17,8 +18,12 @@ const embeddedProxy = Object.fromEntries(
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), cvDownloads()],
-  server: { proxy: embeddedProxy },
+  // touchupSource stamps each element with the file and line it's written at, so a Touchup note says
+  // where. Before react(): it reads the JSX as written.
+  plugins: [touchupSource(), react(), cvDownloads()],
+  // jonass-mbp: reading the CV from another device on the network, with `vp dev --host`. Touchup's
+  // project has that origin too (README.md › Touchup).
+  server: { proxy: embeddedProxy, allowedHosts: ["jonass-mbp"] },
   preview: { proxy: embeddedProxy },
   // Not ours to format: the session log, and generated sprite data kept minified.
   fmt: { ignorePatterns: ["llm-sessions/**", "public/img/cv/clippy-agent.json"] },

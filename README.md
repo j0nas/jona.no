@@ -137,6 +137,22 @@ vp build     # production build → dist/
 vp preview   # serve the production build
 ```
 
+## Touchup
+
+Touchup is the review layer: select some text on the CV, or tap anything, comment on it, and an
+agent picks that up over MCP, fixes the source and replies on the page. Its source is a private repo
+next to this one. `index.html` loads its `t.js`, about 1.5 kB that does nothing for a visitor; the
+widget loads only in a browser that opened a reviewer's invite link. The project is `jona-no` on
+touchup.jona.no, comments only since the CV's text comes from `content/cv/resume.json`, with the
+origins `https://jona.no`, `http://localhost:5173` and `http://jonass-mbp:5173`. The last is for
+another device on the network, and needs `vp dev --host`.
+
+`@touchup/vite` stamps elements with where they're written, which for the CV is `Resume.tsx`, so the
+words of a note are what find it in `resume.json`. The agent's key is in the gitignored `.env`:
+`node ../touchup/packages/cli/touchup.ts` lists the open notes, and Touchup's README has the routine
+and the line that adds its MCP server. The site sends no Content-Security-Policy to the desktop, so
+nothing needs adding there; a page that gets one (`worker/human.ts`) doesn't load Touchup.
+
 ## Deploy
 
 A **Cloudflare Worker** (`worker/index.ts`, config in `wrangler.jsonc`). Cloudflare serves the
