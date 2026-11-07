@@ -114,9 +114,6 @@ until they're folded into the page's source (`worker/edits.ts`). The first passw
 the page without the layer. Someone already signed in can switch at `/<slug>/?logg-inn`, which
 shows the password form again.
 
-`/cv/tldr` is kept the same way, at `cv-tldr/index.html` in the bucket, with Cloudflare Turnstile in
-place of a password (`worker/human.ts`). Passing it sets a signed cookie for a day.
-
 ## Sharable app links
 
 The desktop is routed by the focused app: every app — built-in or embedded — is shareable at
@@ -151,7 +148,7 @@ another device on the network, and needs `vp dev --host`.
 words of a note are what find it in `resume.json`. The agent's key is in the gitignored `.env`:
 `node ../touchup/packages/cli/touchup.ts` lists the open notes, and Touchup's README has the routine
 and the line that adds its MCP server. The site sends no Content-Security-Policy to the desktop, so
-nothing needs adding there; a page that gets one (`worker/human.ts`) doesn't load Touchup.
+nothing needs adding there.
 
 ## Deploy
 
