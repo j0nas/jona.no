@@ -14,7 +14,7 @@ const COPY_LABEL = "Copy the address";
 const DOWNLOADS = [
   { href: CV_PDF, label: "PDF" },
   { href: CV_DOCX, label: "Word document" },
-  { href: CV_JSON, label: "JSON Resume (for developers)" },
+  { href: CV_JSON, label: "JSON" },
 ];
 
 // "quiet" once the balloon's been dismissed: he's there but doesn't pipe up on arrival.
