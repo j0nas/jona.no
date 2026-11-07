@@ -1,4 +1,5 @@
 import { APPS, type EmbeddedApp, MOVED } from "./apps";
+import { humanPage } from "./human";
 import { PAGES, privatePage } from "./private";
 
 // The site's Worker. Cloudflare serves the built desktop (dist/) as static assets, unknown
@@ -6,6 +7,7 @@ import { PAGES, privatePage } from "./private";
 // (run_worker_first) so that:
 // - the other addresses (www, and the old jonas-jensen.com) 301 to jona.no, path kept;
 // - /<slug>/* of a private page (worker/private.ts) is served from R2 behind its password;
+// - /cv/tldr (worker/human.ts) is served from R2 behind a Turnstile check;
 // - /apps/<id>/* is the embedded app's live deploy, fetched and passed back same-origin;
 //   an app that moved to its own address (MOVED) redirects there, path kept, and one that
 //   left with no new home redirects to the home page.
@@ -20,6 +22,7 @@ export default {
     if (ALIASES.has(url.hostname)) {
       return Response.redirect(`https://${CANONICAL}${url.pathname}${url.search}`, 301);
     }
+    if (url.pathname === "/cv/tldr" || url.pathname === "/cv/tldr/") return humanPage(req, env);
     const p = /^\/([^/]+)(\/.*)?$/.exec(url.pathname);
     if (p && Object.hasOwn(PAGES, p[1])) return privatePage(req, env, p[1], PAGES[p[1]], p[2]);
     const m = /^\/apps\/([^/]+)(\/.*)?$/.exec(url.pathname);

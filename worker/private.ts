@@ -27,7 +27,7 @@ export const PAGES: Record<string, PrivatePage> = {
 
 type Role = "view" | "review";
 
-const NOINDEX = "noindex, nofollow, noarchive";
+export const NOINDEX = "noindex, nofollow, noarchive";
 /** `?logg-inn` shows the password form even when signed in, to switch to the other password. */
 const LOGIN = "logg-inn";
 const LAYER = '<script type="module" src="/private/review.js"></script>';
@@ -150,15 +150,15 @@ function form(status: number, wrong: boolean) {
   });
 }
 
-function redirect(status: number, location: string) {
+export function redirect(status: number, location: string) {
   return new Response(null, { status, headers: { location, "x-robots-tag": NOINDEX } });
 }
 
-function text(status: number, body: string) {
+export function text(status: number, body: string) {
   return new Response(body, { status, headers: { "x-robots-tag": NOINDEX } });
 }
 
-function readCookie(req: Request, name: string) {
+export function readCookie(req: Request, name: string) {
   return req.headers
     .get("cookie")
     ?.split(/;\s*/)
@@ -176,13 +176,13 @@ function withLayer(html: string) {
   return at < 0 ? html + LAYER : html.slice(0, at) + LAYER + html.slice(at);
 }
 
-async function digest(s: string) {
+export async function digest(s: string) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /** Constant-time comparison, so the response time doesn't leak how much of a guess matched. */
-function same(a: string | undefined, b: string) {
+export function same(a: string | undefined, b: string) {
   if (a?.length !== b.length) return false;
   let diff = 0;
   for (let i = 0; i < b.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);

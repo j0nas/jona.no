@@ -22,7 +22,13 @@
   },
   // Private pages' files (worker/private.ts), kept out of this public repo.
   "r2_buckets": [{ "binding": "PRIVATE", "bucket_name": "jona-private" }],
-  // Each private page's passwords (worker/private.ts). `wrangler types` takes the names from here.
-  "secrets": { "required": ["PILESTREDET_PASSWORD", "PILESTREDET_REVIEW_PASSWORD"] },
+  // The Turnstile widget's public site key, for /cv/tldr (worker/human.ts). Local dev overrides it
+  // with Cloudflare's always-passes test key in .dev.vars.
+  "vars": { "TURNSTILE_SITE_KEY": "0x4AAAAAAF28wJGqWfUGvpxO" },
+  // Each private page's passwords (worker/private.ts) and the Turnstile widget's secret
+  // (worker/human.ts). `wrangler types` takes the names from here.
+  "secrets": {
+    "required": ["PILESTREDET_PASSWORD", "PILESTREDET_REVIEW_PASSWORD", "TURNSTILE_SECRET"],
+  },
   "observability": { "enabled": true },
 }
