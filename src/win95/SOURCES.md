@@ -267,6 +267,9 @@ bar, the Assistant's balloon) and the About shot (the ruler). No Word 97 binarie
   wide (Style, Font, Size) and 52px (Zoom). The menu bar's document icon is Winword #2. **A
   lifting and sinking button or menu title is from memory**: the captures don't show the pointer on
   one. So is the menus' content, unlike IE's, and their real toolbar icons aren't drawn.
+- **The Assistant's balloon under the pointer**: chosen, since neither [S11] nor Microsoft's Office 97
+  programming docs show its options hovered or pressed. A hand and an underline on hover, down and
+  right by a pixel on press; a touchscreen, where a hover would stick, gets only the press.
 - **Ruler** [S11]: 5px of face, a 13px strip, 6px of face; eighth-inch ticks 12px apart, 2px tall;
   half inches 5px; tab stops 3px below it. The indent marker (`word-ruler-marker.png`) and tab
   selector are cut from the capture. **The grey over the margins is from memory**, since [S11]'s ruler

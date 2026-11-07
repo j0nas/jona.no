@@ -120,8 +120,58 @@
   text-decoration: none;
 }
 
-.option:hover span {
-  color: #000080;
+/*
+ * What an option does under the pointer: no capture or document shows the real balloon's hover or
+ * pressed state (SOURCES.md §Word 97), so these are chosen, in the plainest terms the era had. The
+ * hand and the underline are the browser's own link; the press is a Windows button's, down and right
+ * by a pixel. On a touchscreen a hover would stick after the tap, so only the press applies there.
+ */
+.option,
+.pill {
+  cursor:
+    url("/img/home/ie3-hand.png") 5 0,
+    pointer;
+}
+
+.option *,
+.pill * {
+  cursor: inherit;
+}
+
+@media (hover: hover) {
+  .option:hover span {
+    text-decoration: underline;
+  }
+
+  .pill:hover {
+    border-color: #000000;
+  }
+}
+
+.option:active img,
+.pill:active img {
+  transform: translate(1px, 1px);
+  filter: brightness(0.8);
+}
+
+.option:active span {
+  text-decoration: underline;
+}
+
+.pill:active {
+  border-color: #000000;
+  box-shadow: inset 1px 1px 0 #808080;
+}
+
+@media (pointer: coarse) {
+  .option {
+    margin: 0;
+    padding: 8px 0;
+  }
+
+  .pill {
+    padding: 8px 14px;
+  }
 }
 
 .option:focus-visible span,
