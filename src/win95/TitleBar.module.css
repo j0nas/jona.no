@@ -12,6 +12,7 @@
   padding: 0 2px;
   background: var(--w95-inactive-title);
   color: var(--w95-inactive-title-text);
+  -webkit-user-select: none;
   user-select: none;
 }
 

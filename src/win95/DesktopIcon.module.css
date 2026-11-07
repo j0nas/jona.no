@@ -9,6 +9,8 @@
   width: 75px;
   height: 75px;
   padding-top: 2px;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .image {

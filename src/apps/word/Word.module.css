@@ -1,7 +1,8 @@
 /*
  * Word 97's chrome, sampled from 1:1 captures (SOURCES.md §Word 97). Office 97 command bars: each
  * a raised 1px outline with a double-ridge gripper and flat buttons that lift under the pointer,
- * above the document's sunken client edge.
+ * above the document's sunken client edge. None of it can be selected, so that a selection, a copy
+ * or a Touchup note holds the document's words and nothing else; only the workspace can.
  */
 .word {
   position: relative;
@@ -10,6 +11,8 @@
   flex-direction: column;
   min-height: 0;
   background: var(--w95-3d-face);
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .menuBar,
@@ -246,6 +249,8 @@
   overflow-x: hidden;
   overflow-y: scroll;
   background: var(--w95-3d-shadow);
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* The foot of the scroll bar belongs to .browse (below). */

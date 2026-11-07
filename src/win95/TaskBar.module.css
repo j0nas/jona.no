@@ -11,6 +11,8 @@
   height: var(--w95-taskbar-height);
   padding: 4px 3px 2px 2px;
   background: var(--w95-3d-face);
+  -webkit-user-select: none;
+  user-select: none;
   box-shadow:
     inset 0 1px 0 0 var(--w95-3d-light),
     inset 0 2px 0 0 var(--w95-3d-highlight);

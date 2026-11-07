@@ -16,6 +16,7 @@
   font-size: var(--w95-font-size);
   line-height: 13px;
   box-shadow: var(--w95-bevel-raised-soft);
+  -webkit-user-select: none;
   user-select: none;
 }
 

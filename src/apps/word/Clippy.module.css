@@ -101,6 +101,7 @@
   margin: 0 0 7px;
   line-height: 13px;
   cursor: text;
+  -webkit-user-select: text;
   user-select: text;
 }
 
