@@ -102,35 +102,42 @@ export function buildModel(resume: Resume): CvModel {
   }
 
   const work: Block[] = [];
+  let earlier = false;
   for (const employer of groupByEmployer(resume.work)) {
     const early = !employer.highlights.length;
     const only = employer.roles.length === 1 ? employer.roles[0] : undefined;
     const { head, rest } = highlightGroups(employer);
-    work.push({
-      gap: early ? GAP.earlyJob : GAP.job,
-      items: [
-        {
-          kind: "employer",
-          text: employer.name ?? "",
-          href: employer.url,
-          right: only && dateRange(only.startDate, only.endDate),
-        },
-        ...employer.roles.map((role, i): Item => ({
-          kind: "role",
-          text: role.position ?? "",
-          right: only ? undefined : dateRange(role.startDate, role.endDate),
-          after: !early && i === employer.roles.length - 1 ? 3 : 0,
-        })),
-        ...employer.summaries.map((summary, i): Item => ({
-          kind: "text",
-          runs: plain(summary),
-          before: i ? GAP.bullet : 0,
-        })),
-        ...bullets(head, employer.summaries.length ? GAP.bullet : 0),
-      ],
-    });
+    const items: Item[] = [
+      {
+        kind: "employer",
+        text: employer.name ?? "",
+        href: employer.url,
+        right: only && dateRange(only.startDate, only.endDate),
+      },
+      ...employer.roles.map((role, i): Item => ({
+        kind: "role",
+        text: role.position ?? "",
+        right: only ? undefined : dateRange(role.startDate, role.endDate),
+        after: !early && i === employer.roles.length - 1 ? 3 : 0,
+      })),
+      ...employer.summaries.map((summary, i): Item => ({
+        kind: "text",
+        runs: plain(summary),
+        before: i ? GAP.bullet : 0,
+      })),
+      ...bullets(head, employer.summaries.length ? GAP.bullet : 0),
+    ];
+    // Early jobs stay together, so a line or two of one can't start a page by itself.
+    const previous = work.at(-1);
+    if (early && earlier && previous) {
+      items[0].before = GAP.earlyJob;
+      previous.items.push(...items);
+    } else {
+      work.push({ gap: early ? GAP.earlyJob : GAP.job, items });
+    }
     // The rest of a job's highlights can run on over a page.
     for (const group of rest) work.push({ gap: GAP.bullet, items: bullets(group) });
+    earlier = early;
   }
   add("Experience", work);
 

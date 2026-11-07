@@ -241,30 +241,39 @@ export function resumeBlocks(resume: Resume): ResumeBlock[] {
     section("Summary", [{ gap: 0, node: <p className={styles.text}>{basics.summary}</p> }]);
   }
 
-  section(
-    "Experience",
-    groupByEmployer(resume.work).flatMap((employer) => {
-      const { head, rest } = highlightGroups(employer);
-      return [
-        {
-          gap: employer.highlights.length ? GAP.job : GAP.earlyJob,
-          node: (
-            <>
-              <JobHead employer={employer} />
-              {employer.summaries.map((summary, i) => (
-                <p key={i} className={styles.text}>
-                  {summary}
-                </p>
-              ))}
-              <Bullets items={head} />
-            </>
-          ),
-        },
-        // The rest of a job's highlights can run on over a page.
-        ...rest.map((group) => ({ gap: GAP.bullet, node: <Bullets items={group} /> })),
-      ];
-    }),
-  );
+  const work: Omit<ResumeBlock, "key">[] = [];
+  let earlier = false;
+  for (const employer of groupByEmployer(resume.work)) {
+    const { head, rest } = highlightGroups(employer);
+    const early = !employer.highlights.length;
+    const node = (
+      <>
+        <JobHead employer={employer} />
+        {employer.summaries.map((summary, i) => (
+          <p key={i} className={styles.text}>
+            {summary}
+          </p>
+        ))}
+        <Bullets items={head} />
+      </>
+    );
+    // Early jobs stay together, so a line or two of one can't start a page by itself.
+    const previous = work.at(-1);
+    if (early && earlier && previous) {
+      previous.node = (
+        <>
+          {previous.node}
+          <div style={gapStyle(GAP.earlyJob, false)}>{node}</div>
+        </>
+      );
+    } else {
+      work.push({ gap: early ? GAP.earlyJob : GAP.job, node });
+    }
+    // The rest of a job's highlights can run on over a page.
+    work.push(...rest.map((group) => ({ gap: GAP.bullet, node: <Bullets items={group} /> })));
+    earlier = early;
+  }
+  section("Experience", work);
 
   if (resume.skills?.length) {
     section("Skills", [{ gap: 0, node: <Skills skills={resume.skills} /> }]);

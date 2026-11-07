@@ -119,7 +119,7 @@ function renderItem(item: Item, i: number): ReactNode {
   const marginTop = item.before ?? 0;
   switch (item.kind) {
     case "employer":
-      return row(i, heading(item, s.employer), item.right, 2.7);
+      return row(i, heading(item, s.employer), item.right, 2.7, { marginTop });
     case "role":
       return row(i, h(Text, { style: s.role }, item.text), item.right, 0.9, {
         marginBottom: item.after,

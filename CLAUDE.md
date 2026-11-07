@@ -76,7 +76,8 @@ start.
 It shows in the `cv` window at `/cv`, which opens down to the taskbar (`tall` in the registry), Word
 97 in page layout view (`WordCV.tsx`), on real A4 sheets: the document is cut into blocks that stay
 whole (a section's heading stays with its first entry, an employer's with what's under it, a job's
-last two bullets together), measured off screen, and dealt onto pages (`paginate`) before first
+last two bullets together, as do the early jobs with no bullets and the document's last two
+sections), measured off screen, and dealt onto pages (`paginate`) before first
 paint. The space above a block drops away at the top of a page, and each page's footer sits in the
 bottom margin, below what `paginate` fills. Printing prints those same sheets. While the window is
 focused they're also in a `[data-cv-print]` element on `<body>`, and `print.css` makes that the

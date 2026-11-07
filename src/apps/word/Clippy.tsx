@@ -60,7 +60,7 @@ interface ClippyProps {
   minimized: boolean;
   /** Bumped when Help or the toolbar's Assistant button calls for him. */
   summons: number;
-  /** Set once the document has been scrolled, which dismisses his balloon. Clicking him brings it back. */
+  /** Set once the document has been scrolled: that dismisses his balloon, or stops it opening on arrival. Clicking him brings it back. */
   scrolled: boolean;
   onPrint: () => void;
   onClose: () => void;
@@ -108,13 +108,13 @@ export default function Clippy({
         agent.show(false);
         agent.play("GetAttention");
       }
-      if (readState() !== "quiet") setBalloon(true);
+      if (readState() !== "quiet" && !scrolled) setBalloon(true);
     }, ARRIVAL_MS);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [fits]);
+  }, [fits, scrolled]);
 
   useEffect(
     () => () => {
@@ -137,7 +137,7 @@ export default function Clippy({
   }, [summons]);
 
   useEffect(() => {
-    if (scrolled) dismiss();
+    if (scrolled && balloon) dismiss();
   }, [scrolled]);
 
   function openBalloon() {

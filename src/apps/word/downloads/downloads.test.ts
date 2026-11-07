@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vite-plus/test";
 import resumeJson from "../../../../content/cv/resume.json";
-import { groupByEmployer, resume, type Resume } from "../resumeData";
+import { GAP, groupByEmployer, resume, type Resume } from "../resumeData";
 import { buildDocx } from "./docx";
 import { EASTER_EGG } from "./easterEgg";
 import { buildModel } from "./model";
@@ -82,6 +82,21 @@ describe("the CV model", () => {
     expect(section.blocks.map((b) => b.items.filter((i) => i.kind === "bullet").length)).toEqual([
       1, 1, 2,
     ]);
+  });
+
+  test("keeps early jobs, with no bullets, in one block", () => {
+    const [section] = buildModel({
+      work: [
+        { name: "A", position: "one", highlights: ["a"] },
+        { name: "B", position: "two", summary: "b" },
+        { name: "C", position: "three", summary: "c" },
+      ],
+    }).sections;
+    expect(section.blocks.map((b) => b.items.filter((i) => i.kind === "employer").length)).toEqual([
+      1, 2,
+    ]);
+    expect(section.blocks[1].gap).toBe(GAP.earlyJob);
+    expect(section.blocks[1].items[3]).toMatchObject({ kind: "employer", before: GAP.earlyJob });
   });
 
   test("gives a project its address only where the title doesn't", () => {
