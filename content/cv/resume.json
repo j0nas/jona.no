@@ -12,11 +12,11 @@
       },
       {
         "label": "Work",
-        "text": "Ruter / Tet Digital (public transport, 2022–2026), Rellio (co-founder and CTO, 2022–2025), Minus (consultancy, 2019–2022), Greenbird (2017–2019), Netcompany (2016–2017)"
+        "text": "Ruter / Tet Digital (public transport, full-stack consultant, 2022–2026), Rellio (real estate software, co-founder and CTO, 2022–2025), Minus (software consultancy, full-stack consultant, 2019–2022), Greenbird (energy sector software, senior software engineer, 2017–2019), Netcompany (IT services, full-stack developer, 2016–2017)"
       },
       {
         "label": "Scale",
-        "text": "snl.no: 2.9 million readers a month. Ruter's demand-responsive transport: nearly 900,000 trips in 2022."
+        "text": "snl.no: 2.9 million readers a month (2021), on a platform that also runs Denmark's national encyclopedia, lex.dk. Ruter's demand-responsive transport: around 900,000 trips a year."
       },
       {
         "label": "Led",
@@ -27,8 +27,8 @@
         "text": "TypeScript, React, React Native, Next.js, Node, Kotlin, Ruby on Rails, GraphQL, PostgreSQL, Google Cloud, Kubernetes, Docker, Terraform"
       },
       {
-        "label": "LLMs",
-        "text": "Coding agents, MCP, local models, evaluation suites"
+        "label": "LLMs/AI",
+        "text": "My main focus since June 2026, across around 40 projects: coding agents, MCP and local models, and measuring what models can be trusted with through evaluation suites"
       },
       {
         "label": "Languages",
@@ -39,7 +39,7 @@
         "text": "Bachelor's degree in IT (2016), web security certificate (2017), Norwegian trade certificate in computer electronics (2012)"
       }
     ],
-    "summary": "Much of my work has been taking over systems that had become hard to change. I also go and meet the people who use what I build: at Ruter, interviews with schools and daycare centres led to two new apps. What matters to me is the end result. Language models now let me build far more of it, and my experience tells me what to ask for and how to judge what comes back.",
+    "summary": "Much of my work has been taking systems that had become hard to change and making them good to build on again. I also go and meet the people who use what I build: at Ruter, interviews with schools and daycare centres led to two new apps. What matters to me is the end result, which is why language models have been the most exciting part of my career. Having coded for over half my life lets me thrive with them: I know what to ask for and how to judge what comes back.",
     "location": {
       "city": "Oslo",
       "region": "Oslo",
@@ -63,15 +63,16 @@
       "name": "Own projects",
       "position": "Learning and building with language models",
       "startDate": "2026-06",
-      "summary": "Since my Ruter contract ended I've been developing my skills and experimenting with language models and agentic development, across around 40 projects large and small. I'd gladly talk anyone's ear off about it if given the chance.",
+      "summary": "Since my Ruter contract ended, language models have been my main interest and most of what I do, across around 40 projects large and small. I want to know what they can be trusted with, so I measure them and compare them on the same job, and I build so that deterministic code makes the decisions while a model does the narrow part it's good at. I'd gladly talk anyone's ear off about it.",
       "highlights": [
         "[Touchup](https://touchup.jona.no) lets non-developers comment on or edit a live site from their phone. A coding agent picks up the notes, fixes the source and replies on the page. This CV was reviewed with it.",
+        "I ran a local model as a code compiler to find where verification breaks: 28 of 31 transforms verified in an unattended run, and code and tests could still agree on nonsense. A used hi-fi deal monitor lets deterministic code decide while a local model only reads the listings, and a voice-controlled [Hacker News reader](https://github.com/j0nas/hn-voice-config) has a small local model edit its config. Both are held to evaluation suites.",
+        "I do most of my building through coding agents, more than 240 of them logged in four weeks in autumn 2026, and wrote the tooling to run them, which plans work against usage limits and keeps per-project session logs. I'm also learning Rust from a course with a Claude tutor, so I can review the Rust agents write.",
+        "Earlier in 2026 I took [Pep](https://pep.dev) to a working beta: a hosting platform where a coding agent deploys an app through MCP, the standard way for agents to call tools, and gets back a live URL. I shelved it before it had users.",
+        "I'm building [Formeriet](https://formeriet.no), a web store for made-to-measure products that I print or laser-cut myself. Customers type in their measurements and see the result in a live 3D viewer, and the same code produces the price and the print files. It hasn't launched yet.",
         "[edh.land](https://edh.land) suggests cards for Magic: The Gathering Commander decks, ranking highest the cards that pair with several already in the deck.",
         "[Floor Planner](https://jona.no/floor-planner) works out the best layout for a laminate floor, including the cut list.",
         "[jona.no](https://jona.no) is my personal site, a Windows 95 desktop in React with its own component library.",
-        "I'm building [Formeriet](https://formeriet.no), a web store for made-to-measure products that I print or laser-cut myself. Customers type in their measurements and see the result in a live 3D viewer, and the same code produces the price and the print files. It hasn't launched yet, and I haven't seen the idea elsewhere in Norway.",
-        "Earlier this year I took [Pep](https://pep.dev) to a working beta: a hosting platform where a coding agent deploys an app through MCP, the standard way for agents to call tools, and gets back a live URL. I shelved it before it had users.",
-        "With language models I've used a local model as a code compiler to find where verification breaks, gave a voice-controlled Hacker News reader a small local model with an evaluation suite, and built a used hi-fi deal monitor where deterministic code decides and a local model only reads the listings. For coding agents I built tooling that plans work against usage limits and keeps per-project session logs, and I'm learning Rust from a course taught by a Claude tutor.",
         "I rescue old Kindles that Amazon has cut off. I jailbreak them, install KOReader and write plugins for a summarised news page, my task list on the sleep screen and a chat with a local model, which keeps them out of landfill.",
         "I reverse-engineered a Silhouette card cutter's Bluetooth protocol and firmware to write my own driver, designed a pantry workstation for my 3D printer and laser in Fusion with a WebXR page for viewing it 1:1 on a Quest 3, and built a Raspberry Pi e-ink board that shows bus departures and the weather.",
         "Other things along the way include a [browser-based CAD editor](https://github.com/j0nas/parametric-3d-editor) on OpenCASCADE compiled to WebAssembly, a lamp shade designer that previews the shadows on a wall, stackable tray generators, a 3D game in Godot about sorting screws, a Whisper-based subtitle checker, keyboard shortcut sheets that match your layout and a collaborative Steam game list for LAN parties."
@@ -82,14 +83,13 @@
       "position": "Full-stack consultant",
       "startDate": "2022-08",
       "endDate": "2026-06",
-      "summary": "Ruter runs public transport in Oslo and Akershus, and its development side became the subsidiary Tet Digital in 2024. I worked on demand-responsive transport (tilrettelagt transport) for people who can't use ordinary public transport, with nearly 900,000 trips in 2022. I was a consultant through my company, Code Green AS, in self-directed teams of 5 to 10, and ended up as de facto tech lead and one of the longest-serving people there.",
+      "summary": "Ruter runs public transport in Oslo and Akershus, and its development side became the subsidiary Tet Digital in 2024. I worked on demand-responsive transport (tilrettelagt transport) for people who can't use ordinary public transport, with around 900,000 trips a year. I was a consultant through my company, Code Green AS, in self-directed teams of 5 to 10, and ended up as de facto tech lead and one of the longest-serving people there.",
       "highlights": [
         "Early on I tracked down random backend crashes that gave customer service daily trouble and that nobody on the team had been able to explain. They came from the hosting setup, so I moved the backend to a more stable one. The product lead promised cake to whoever fixed them. I'm still waiting.",
-        "I look after how a team works as well as what it ships. There were no automated builds and few tests when I joined. By the time I left they were routine, and I'd cut a 45-minute test run to 15.",
-        "Most of my time went on the backend that connects the customer-facing apps to a third-party planning system.",
-        "For a while I was brought onto another team to start a new Kotlin backend. What I built became the foundation of the service that hides the differences between demand-responsive transport providers.",
+        "I look after how a team works as well as what it ships. I greatly improved the developer experience and dealt with a huge amount of technical debt, rearchitecting a lot of the system along the way. There were no automated builds and few tests when I joined. By the time I left they were routine, and I'd cut a 45-minute test run to 15 while increasing coverage manyfold.",
+        "Most of my time went to the backend that connects the customer-facing apps to a third-party planning system. For a while I was also brought onto another team to start a new Kotlin backend and help shape its architecture, and what I built there became the foundation of the service that hides the differences between demand-responsive transport providers.",
         "On my own initiative I started interviewing the schools and daycare centres at the other end of these trips. That led to two new apps: a daily overview of trips for those institutions, and a replacement for a partly broken school transport app that nobody knew how to update. We were onboarding users when I left. Ruter's school transport carries more than 4,000 children a day.",
-        "I was the team's Security Champion and main DevOps person, and worked on its move to Kubernetes. Otherwise I was its utility player, in TypeScript, React, Node and Kotlin."
+        "I was the team's Security Champion, stepped into DevOps wherever I was needed, including the move to Kubernetes, and otherwise was its utility player."
       ]
     },
     {
@@ -97,13 +97,12 @@
       "position": "Co-founder and CTO",
       "startDate": "2022-12",
       "endDate": "2025-08",
-      "summary": "[Rellio](https://www.rellio.no) helps real estate agents run a property sale from assignment to sale, in a workspace shared with the seller, photographers, appraisers and home stagers. I started it with a real estate photographer of more than 20 years, and built it in the evenings and at weekends alongside full-time consulting.",
+      "summary": "[Rellio](https://www.rellio.no) helps real estate agents run a property sale from start to finish, in a workspace shared with the seller, photographers, appraisers and home stagers. I started it with a real estate photographer of over 20 years, and built it in the evenings and at weekends alongside full-time consulting.",
       "highlights": [
-        "Real estate agents planned each sale on a shared calendar with the seller and suppliers. They prepared listing photos, including AI virtual staging, and could question uploaded documents through a language model.",
-        "By the time I left it was about 56,000 lines of TypeScript, most of them mine, with two-way sync to Google and Microsoft calendars and to Vitec Next, one of the main systems real estate agents in Norway work in.",
-        "I directed and reviewed the work of several outside developers.",
         "I worked directly with about five real estate agents on what to build, ran user testing, and tried my hand at sales. We had real users, and people paid to use its neighbourhood photos.",
-        "I left in 2025 after nearly three years and handed the code base and ownership to my co-founder. The product carries on as Rellio."
+        "Real estate agents planned each sale on a shared calendar, synced both ways with Google, Microsoft and Vitec Next, one of the main systems they work in. They prepared listing photos, including AI virtual staging, and could question uploaded documents through a language model.",
+        "I wrote most of its roughly 56,000 lines of TypeScript, and directed and reviewed the work of several outside developers.",
+        "I left in 2025 and handed the code base and ownership to my co-founder. It carries on as Rellio."
       ]
     },
     {
@@ -111,12 +110,11 @@
       "position": "Full-stack consultant",
       "startDate": "2019-04",
       "endDate": "2022-07",
-      "summary": "Minus is a small Oslo consultancy. Most of my time went to Store norske leksikon ([snl.no](https://snl.no)), Norway's national encyclopedia, with 2.9 million readers a month in 2021.",
+      "summary": "Minus is a small Oslo consultancy. Most of my time went to Store norske leksikon ([snl.no](https://snl.no)), Norway's national encyclopedia, with 2.9 million readers a month in 2021. It's a non-profit owned by the country's universities and other institutions, and more than 1,300 hand-picked subject experts write it with a small editorial team.",
       "highlights": [
         "I led a team of two or three on snl.no, with main responsibility for running and developing it. I learned Ruby on Rails for the job, and within three months was writing the idiomatic Rails the code base had been missing.",
-        "With one other developer I moved it from on-premise servers to Google Cloud and rewrote it as a multi-tenant application, so Denmark's national encyclopedia, [lex.dk](https://lex.dk), could move onto it.",
-        "I took [sanity.io](https://www.sanity.io)'s Lighthouse score from 35 to 85+ by finding and fixing its performance problems.",
-        "For Foodsteps, a Norwegian cooking app, I moved the service from Heroku to Google Cloud using Terraform."
+        "With one other developer I rewrote the platform as a cloud-native, multi-tenant application on Google Cloud while still shipping features. A system in poor shape became one good enough for Denmark's national encyclopedia, [lex.dk](https://lex.dk), to adopt for its own articles and editors. Lex still runs on it and helps pay for its development.",
+        "On shorter projects I took the Lighthouse score of [sanity.io](https://www.sanity.io), a content platform, from 35 to 85+, and moved Foodsteps, a Norwegian cooking app, from Heroku to Google Cloud using Terraform."
       ]
     },
     {
@@ -137,9 +135,8 @@
       "endDate": "2019-02",
       "summary": "Greenbird makes integration software for energy utilities, and was a Gartner Cool Vendor in 2018.",
       "highlights": [
-        "I was the company's frontend lead, and for a long while the only frontend developer on its in-house products. I built the UI for most of them, including its integration platform for the energy sector.",
+        "I was the company's frontend lead, and for a long while the only frontend developer on its in-house products. I chose the technology and practices and built the UI for most of them, including its integration platform for the energy sector, along with the data visualisation and visual identity.",
         "I was promoted to Senior after a year, two years after graduating.",
-        "I chose the frontend technology and practices, and did the data visualisation and visual identity too.",
         "For Oslo Metropolitan University I worked with end users to build a system for tracking grant applications, and mentored others on the project."
       ]
     },
@@ -154,32 +151,24 @@
       "position": "Analyst and full-stack developer",
       "startDate": "2016-08",
       "endDate": "2017-05",
-      "summary": "In my first job after graduating I was frontend lead for a team of about five at Møller Mobility Group, a Norwegian car importer and dealer group, in React, Redux, Node and Java.",
+      "summary": "Netcompany is a Danish IT services company. In my first job after graduating I was frontend lead for a team of about five at Møller Mobility Group, a Norwegian car importer and dealer group.",
       "highlights": [
         "I visited used-car centres and interviewed the staff to learn how the process worked, then built the system that tracks where each car is and what's been done to it.",
-        "I started a shared library of UI components and mentored others on the team.",
-        "My bachelor's thesis for Møller was a web application to partly replace a legacy system, built with UX designers and end users. I owned the frontend and finished it after graduating."
+        "I started a UI component library for all of Møller's developers, and mentored others.",
+        "My bachelor's thesis for Møller was a web application to partly replace a legacy system, built with UX designers and end users. I owned the frontend. It became a production app, and Møller made us generous job offers so we could carry on with it."
       ]
-    },
-    {
-      "name": "Netcompany A/S",
-      "position": "Bachelor thesis",
-      "startDate": "2016-01",
-      "endDate": "2016-06"
     },
     {
       "name": "Westerdals Oslo ACT",
       "position": "Programming tutor",
       "startDate": "2014-08",
-      "endDate": "2015-12",
-      "summary": "I tutored students and gave revision lectures in programming courses."
+      "endDate": "2015-12"
     },
     {
       "name": "Forbrukerrådet (Norwegian Consumer Council)",
       "position": "IT apprentice, then IT support",
       "startDate": "2011-07",
-      "endDate": "2013-07",
-      "summary": "I ran IT operations and first-line support, and earned a trade certificate as a computer electronics technician."
+      "endDate": "2013-07"
     }
   ],
   "education": [
