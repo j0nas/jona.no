@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { createPortal } from "react-dom";
 import AppWindow, { type WindowControls } from "../../components/window/AppWindow";
 import { MenuBar, StatusBar } from "../../win95";
-import Clippy, { assistantClosed, setAssistantState } from "./Clippy";
+import Clippy, { assistantClosed, setAssistantClosed } from "./Clippy";
 import { EASTER_EGG } from "./downloads/easterEgg";
 import { Measure, OnlineLayout, Sheets, resumeBlocks } from "./Resume";
 import { PAGE_H, PAGE_MARGIN, PAGE_MARGIN_Y, PAGE_W, paginate, resume } from "./resumeData";
@@ -24,6 +24,8 @@ const ONLINE_BELOW = 600;
 
 // The Assistant's window, plus its distance from the workspace's right edge.
 const ASSISTANT_W = 136;
+// His balloon, likewise.
+const BALLOON_W = 210;
 
 interface WordCVProps {
   controls: WindowControls;
@@ -50,7 +52,6 @@ export default function WordCV({ controls }: WordCVProps) {
   const [pageNumber, setPageNumber] = useState(1);
   const [assistantOn, setAssistantOn] = useState(() => !assistantClosed());
   const [summons, setSummons] = useState(0);
-  const [scrolled, setScrolled] = useState(false);
 
   // Blocks are measured once, off screen at text width, and dealt onto pages before first paint.
   const measureRef = useCallback(
@@ -81,6 +82,7 @@ export default function WordCV({ controls }: WordCVProps) {
   // The Assistant sits over the gutter and the page's margin. No room for him there means he'd be
   // covering the words, so he stays away (and never loads, on a phone).
   const assistantFits = pageLeft + PAGE_MARGIN * zoom >= ASSISTANT_W && size.height >= 260;
+  const balloonFits = pageLeft + PAGE_MARGIN * zoom >= BALLOON_W;
 
   // Ctrl+P is the browser's unless this is the focused window.
   useEffect(() => {
@@ -103,11 +105,10 @@ export default function WordCV({ controls }: WordCVProps) {
     const pitch = online ? workspace.scrollHeight / count : (PAGE_H + PAGE_GAP) * zoom;
     const reading = workspace.scrollTop + size.height / 3;
     setPageNumber(Math.min(count, Math.floor(reading / pitch) + 1));
-    setScrolled(true);
   };
 
   function showAssistant() {
-    setAssistantState("quiet");
+    setAssistantClosed(false);
     setAssistantOn(true);
     setSummons((n) => n + 1);
   }
@@ -162,9 +163,9 @@ export default function WordCV({ controls }: WordCVProps) {
             {assistantOn && (
               <Clippy
                 fits={assistantFits}
+                balloonFits={balloonFits}
                 minimized={controls.minimized}
                 summons={summons}
-                scrolled={scrolled}
                 onPrint={print}
                 onClose={() => setAssistantOn(false)}
               />

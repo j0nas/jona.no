@@ -17,28 +17,22 @@ const DOWNLOADS = [
   { href: CV_JSON, label: "JSON" },
 ];
 
-// "quiet" once the balloon's been dismissed: he's there but doesn't pipe up on arrival.
-// "closed" once his window's been closed: he stays away until Help or the toolbar brings him back.
-type AssistantState = "quiet" | "closed";
-
-function readState(): AssistantState | null {
+// His window closed stays closed, until Help or the toolbar brings him back.
+export function setAssistantClosed(closed: boolean): void {
   try {
-    return localStorage.getItem(STORAGE_KEY) as AssistantState | null;
-  } catch {
-    return null;
-  }
-}
-
-export function setAssistantState(state: AssistantState): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, state);
+    if (closed) localStorage.setItem(STORAGE_KEY, "closed");
+    else localStorage.removeItem(STORAGE_KEY);
   } catch {
     // Private windows and blocked storage: he just forgets.
   }
 }
 
 export function assistantClosed(): boolean {
-  return readState() === "closed";
+  try {
+    return localStorage.getItem(STORAGE_KEY) === "closed";
+  } catch {
+    return false;
+  }
 }
 
 // clippyjs's own asset modules inline a 1.8MB sprite and the sounds as base64; these point it at a
@@ -57,11 +51,11 @@ async function loadAgent(): Promise<Agent> {
 interface ClippyProps {
   /** Whether he'd fit without covering text. While false he's hidden, and not loaded if he hasn't been yet. */
   fits: boolean;
+  /** Whether his balloon would fit without covering text. While false it doesn't open on arrival; clicking him still opens it. */
+  balloonFits: boolean;
   minimized: boolean;
   /** Bumped when Help or the toolbar's Assistant button calls for him. */
   summons: number;
-  /** Set once the document has been scrolled: that dismisses his balloon, or stops it opening on arrival. Clicking him brings it back. */
-  scrolled: boolean;
   onPrint: () => void;
   onClose: () => void;
 }
@@ -74,9 +68,9 @@ interface ClippyProps {
  */
 export default function Clippy({
   fits,
+  balloonFits,
   minimized,
   summons,
-  scrolled,
   onPrint,
   onClose,
 }: ClippyProps) {
@@ -108,13 +102,13 @@ export default function Clippy({
         agent.show(false);
         agent.play("GetAttention");
       }
-      if (readState() !== "quiet" && !scrolled) setBalloon(true);
+      if (balloonFits) setBalloon(true);
     }, ARRIVAL_MS);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [fits, scrolled]);
+  }, [fits, balloonFits]);
 
   useEffect(
     () => () => {
@@ -135,10 +129,6 @@ export default function Clippy({
   useEffect(() => {
     if (summons) openBalloon();
   }, [summons]);
-
-  useEffect(() => {
-    if (scrolled && balloon) dismiss();
-  }, [scrolled]);
 
   function openBalloon() {
     setView("main");
@@ -173,12 +163,11 @@ export default function Clippy({
   }
 
   function dismiss() {
-    setAssistantState("quiet");
     setBalloon(false);
   }
 
   function close() {
-    setAssistantState("closed");
+    setAssistantClosed(true);
     onClose();
   }
 

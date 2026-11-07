@@ -91,7 +91,8 @@ whole page on paper, with `@page` at A4 and no margin. To check a change, Ctrl+P
 workspace under 600px wide, as on a phone, gets online layout view instead: the same blocks reflowed
 at reading size, with no sheets, ruler or toolbars, and it still prints as the sheets. The Office
 Assistant (`Clippy.tsx`) sits in the gutter beside the page and stays away when that would cover
-text, as on a phone. The document's first scroll dismisses his balloon; clicking him brings it back.
+text, as on a phone. His balloon opens when he arrives, if it too would clear the text, and stays
+until it's dismissed; clicking him brings it back. Only closing his window is remembered.
 
 Review notes on the CV come through Touchup (README › Touchup). `node ../touchup/packages/cli/touchup.ts`
 lists the open ones. Each gives the exact words selected, so search for those in `resume.json`; the
