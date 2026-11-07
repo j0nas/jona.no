@@ -8,6 +8,8 @@ interface AppMeta {
   iconSmall: string;
   title: string;
   defaultSize: { width: number; height: number };
+  // Opens as tall as the viewport allows, down to the taskbar, however short defaultSize is.
+  tall?: boolean;
   // Set for an *embedded* app: a standalone web app in its own repo that deploys
   // itself, served here by a same-origin proxy to that live deploy (see the
   // /apps/<id>/ rule in netlify.toml). The value is the path the hosting <iframe>
@@ -17,6 +19,19 @@ interface AppMeta {
 }
 
 export const apps = {
+  internet: {
+    icon: "/img/win95/internet-32.png",
+    iconSmall: "/img/win95/internet-16.png",
+    title: "Jonas's Home Page - Microsoft Internet Explorer",
+    defaultSize: { width: 760, height: 560 },
+  },
+  cv: {
+    icon: "/img/cv/worddoc-32.png",
+    iconSmall: "/img/cv/word-16.png",
+    title: "Jonas Jensen CV.doc - Microsoft Word",
+    defaultSize: { width: 1100, height: 720 },
+    tall: true,
+  },
   wordpad: {
     icon: "/img/win95/wordpad-32.png",
     iconSmall: "/img/win95/wordpad-16.png",

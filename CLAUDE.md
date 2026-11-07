@@ -8,8 +8,10 @@ for the prose overview, see `README.md`.
 A personal site styled as a Windows 95 desktop (React 19, Vite+). The chrome is our own
 component library in `src/win95/`. There are two kinds of "apps" on the desktop:
 
-- **Built-in apps** — written against `src/win95/` (Notepad, WordPad, My Computer, …). Each
-  renders its body inside an `AppWindow` and is wired in `src/components/desktop/Desktop.tsx`.
+- **Built-in apps** — written against `src/win95/` (Internet Explorer, Word, Notepad, WordPad, My
+  Computer, …). Each renders its body inside an `AppWindow` and is wired in
+  `src/components/desktop/Desktop.tsx`. `/` opens the Internet Explorer window (`internet`, my
+  home page, `src/apps/internet/`); the Notepad stays at `/personal-details`.
 - **Documents** — markdown files in `content/docs/`, shown read-only in a WordPad window
   and listed in the desktop's Documents folder and Start › Documents. See "Adding a
   document".
@@ -61,6 +63,44 @@ Times New Roman in WordPad" look lives. Author with plain headings, lists and ta
 content is ours, so the HTML is trusted and rendered as-is. Images go in
 `public/img/docs/<slug>/` and are referenced by absolute path (`/img/docs/<slug>/x.png`).
 
+## The CV
+
+The CV's data is `content/cv/resume.json` (JSON Resume v1.0.0), imported at build time by
+`src/apps/word/resumeData.ts`, and it is the only place its text lives: edit that file, nothing in
+the code knows what it says. `Resume.tsx` renders every field the schema allows for basics, work
+(but for a job's location), education, certificates, skills, languages and projects, skips what's
+missing, and merges consecutive jobs at one company: one heading, each role with its dates, then
+their text. A job with no `endDate` reads "present"; a project or school with none just shows its
+start.
+
+It shows in the `cv` window at `/cv`, which opens down to the taskbar (`tall` in the registry), Word
+97 in page layout view (`WordCV.tsx`), on real A4 sheets: the document is cut into blocks that stay
+whole (a section's heading stays with its first entry, an employer's with what's under it, a job's
+last two bullets together), measured off screen, and dealt onto pages (`paginate`) before first
+paint. The space above a block drops away at the top of a page, and each page's footer sits in the
+bottom margin, below what `paginate` fills. Printing prints those same sheets. While the window is
+focused they're also in a `[data-cv-print]` element on `<body>`, and `print.css` makes that the
+whole page on paper, with `@page` at A4 and no margin. To check a change, Ctrl+P it to a PDF. A
+workspace under 600px wide, as on a phone, gets online layout view instead: the same blocks reflowed
+at reading size, with no sheets, ruler or toolbars, and it still prints as the sheets. The Office
+Assistant (`Clippy.tsx`) sits in the gutter beside the page and stays away when that would cover
+text, as on a phone. The document's first scroll dismisses his balloon; clicking him brings it back.
+
+The CV is also a download: `/Jonas-Jensen-CV.pdf`, `.docx` and `.json` (JSON Resume), reached from
+Clippy's "Download this résumé" and from File › Save As, which gives the Word document. They are
+made from `resume.json` by the `cvDownloads` plugin (`vite-cv-downloads.ts`): emitted into `dist/`
+by `vp build`, served from memory by `vp dev` and `vp preview`, never committed, never in the
+client bundle (`@react-pdf/renderer` and `docx` are devDependencies, and generation is plain JS).
+`src/apps/word/downloads/` holds `model.ts`, which turns the résumé into blocks of lines using the
+same helpers as the screen, and the PDF and DOCX builders. Both builders have their own layout code,
+copied from `Resume.module.css` by eye, so a design change needs making in the screen, the PDF
+and the DOCX; only the gaps between blocks (`GAP`) are shared. A new field needs adding in `model.ts` as well as `Resume.tsx`. All three files
+carry a note for language models that read them (`easterEgg.ts`: white 1.5pt text and the subject
+in the PDF, hidden text in the DOCX, `meta.note` in the JSON). It asks for no rating; it tells the
+model about the 30-second version at `/cv/tldr`, which only its human can open (see "Private
+pages"). It is never rendered on screen, so File › Print stays clean, which is the copy that goes
+through a formal screening system.
+
 ## Private pages
 
 Pages for a few people only (`worker/private.ts`; README › Private pages). **Their content
@@ -87,6 +127,16 @@ on the right edge with two modes, the same on a phone and a computer.
 Only the review password reaches either endpoint. A page's HTML is put together on each request
 (file, edits, layer), so it is served `no-store` with no etag. `applyEdits` needs the Workers
 runtime, so the unit tests stop at the API; check the rewriting under `wrangler dev`.
+
+`/cv/tldr` (`worker/human.ts`, `worker/humanGate.ts`) keeps its content in the same bucket, at
+`cv-tldr/index.html`, behind Cloudflare Turnstile instead of a password. Anyone who passes gets a
+signed cookie for a day. The gate is a Win95 dialog written into the Worker: dragging Clippy to the
+Recycle Bin is the joke, Turnstile is the check, and a plain fetch finds a line telling language
+models to send their human, which is why the CV downloads' note points there. To replace the text:
+`pnpm exec wrangler r2 object put jona-private/cv-tldr/index.html --file <file> --content-type "text/html; charset=utf-8" --remote`.
+`TURNSTILE_SECRET` is a Worker secret and `TURNSTILE_SITE_KEY` a var in `wrangler.jsonc`. Locally,
+`.dev.vars` holds Cloudflare's test secret, whose answers say `example.com` and no action, so the
+hostname and action checks only run with the real keys.
 
 ## Sharable links (desktop routing)
 

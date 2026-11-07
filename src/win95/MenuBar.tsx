@@ -15,9 +15,10 @@ export interface Menu {
  * menu already open, hovering another title switches to it and Left / Right step
  * between them (Win95 "menu track"). An outside press or Escape closes. The open
  * title turns to the navy selection, as Win95 draws it (the sunken 3D title is
- * Win98's).
+ * Win98's). `flat` is the Office 97 command bar's look instead: a title lifts under the pointer
+ * and sinks when open, with no navy.
  */
-export default function MenuBar({ menus }: { menus: Menu[] }) {
+export default function MenuBar({ menus, flat = false }: { menus: Menu[]; flat?: boolean }) {
   const [open, setOpen] = useState<{ index: number; keyboard: boolean } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -34,7 +35,7 @@ export default function MenuBar({ menus }: { menus: Menu[] }) {
     setOpen((o) => o && { index: (o.index + by + menus.length) % menus.length, keyboard: true });
 
   return (
-    <div className={styles.bar} ref={ref}>
+    <div className={`${styles.bar}${flat ? ` ${styles.flat}` : ""}`} ref={ref}>
       {menus.map((menu, i) => (
         <div className={styles.slot} key={menu.label}>
           <div

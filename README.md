@@ -1,9 +1,10 @@
 # jona.no
 
 A personal site styled as a Windows 95 desktop — draggable windows, a Start menu, a
-taskbar, and a handful of "apps" (Notepad, WordPad, My Computer, Recycle Bin, Personal), a
-Documents folder of markdown write-ups, a Domains folder of shortcuts to every domain I own,
-plus standalone web apps (e.g. the Floor Planner) embedded in their own windows.
+taskbar, and a handful of "apps" (Internet Explorer 3 showing my home page, which is what opens at
+`/`; Word 97 showing my CV; Notepad, WordPad, My Computer, Recycle Bin, Personal), a Documents
+folder of markdown write-ups, a Domains folder of shortcuts to every domain I own, plus standalone
+web apps (e.g. the Floor Planner) embedded in their own windows.
 
 Live at **[jona.no](https://jona.no)** (the older `jonas-jensen.com` redirects there — see
 [Domains](#domains)).
@@ -80,6 +81,12 @@ adding a file: the first `# ` heading is its title, the file name its slug, and 
 shareable at `/docs/<slug>` (e.g. [`/docs/mtg-proxying`](https://jona.no/docs/mtg-proxying)).
 The markdown is compiled at build time with `marked`, so the site stays a static SPA.
 
+## The CV
+
+The CV at [`/cv`](https://jona.no/cv) is `content/cv/resume.json` (JSON Resume), rendered at build
+time in a Word 97 window on A4 sheets (`src/apps/word/`). File › Print, the toolbar's Print button
+and Ctrl+P print just those sheets, so saving a PDF is the way to get a copy of it.
+
 ## Private pages
 
 Some pages are for a few people only, and this repo is public, so their content never comes
@@ -106,6 +113,9 @@ log at `_edits/<slug>.json` that the Worker applies to the page for everyone as 
 until they're folded into the page's source (`worker/edits.ts`). The first password still opens
 the page without the layer. Someone already signed in can switch at `/<slug>/?logg-inn`, which
 shows the password form again.
+
+`/cv/tldr` is kept the same way, at `cv-tldr/index.html` in the bucket, with Cloudflare Turnstile in
+place of a password (`worker/human.ts`). Passing it sets a signed cookie for a day.
 
 ## Sharable app links
 

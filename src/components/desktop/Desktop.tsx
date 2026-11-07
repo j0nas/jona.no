@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { DesktopIcon, StartMenu, TaskBar, type StartEntry } from "../../win95";
 import type { WindowControls } from "../window/AppWindow";
@@ -8,10 +8,11 @@ import MyComputer from "../../apps/my-computer/MyComputer";
 import RecycleBin from "../../apps/recycle-bin/RecycleBin";
 import Notepad from "../../apps/notepad/Notepad";
 import Personal from "../../apps/personal/Personal";
-import Documents from "../../apps/documents/Documents";
+import Documents, { CV_FILE_NAME } from "../../apps/documents/Documents";
 import Domains from "../../apps/domains/Domains";
 import DocViewer from "../../apps/documents/DocViewer";
 import EmbeddedApp from "../../apps/embedded/EmbeddedApp";
+import InternetExplorer from "../../apps/internet/InternetExplorer";
 import ShutDown from "../../apps/system/ShutDown";
 import Run from "../../apps/system/Run";
 import { resolveRun } from "../../apps/system/runCommand";
@@ -26,11 +27,16 @@ import {
 import { docs } from "../../docs";
 import styles from "./Desktop.module.css";
 
+// The CV window (Word's chrome and the résumé's data) loads when it's first opened.
+const WordCV = lazy(() => import("../../apps/word/WordCV"));
+
 // Desktop icons down the left edge. Labels differ from window titles (e.g. the
 // file name rather than "… - WordPad").
 const DESKTOP_ICONS: { id: string; appId: AppId; label: string }[] = [
   { id: "my-computer", appId: "my-computer", label: "My Computer" },
   { id: "recycle-bin", appId: "recycle-bin", label: "Recycle Bin" },
+  { id: "internet", appId: "internet", label: "The Internet" },
+  { id: "cv", appId: "cv", label: CV_FILE_NAME },
   { id: "wordpad", appId: "wordpad", label: "Document.rtf" },
   { id: "personal-details", appId: "personal-details", label: "personal-details.txt" },
   { id: "personal", appId: "personal", label: "Personal" },
@@ -53,6 +59,7 @@ interface WinState {
   z: number;
   minimized: boolean;
   maximized: boolean; // spawn state only — the window owns maximize/restore after that
+  height?: number; // likewise; a window with none spawns at its default height
 }
 
 // Renders each built-in app's body, handing it the window controls Desktop
@@ -61,6 +68,12 @@ interface WinState {
 // loop below.
 type Renderer = (controls: WindowControls, open: (id: WindowId) => void) => ReactElement;
 const renderers: Partial<Record<AppId, Renderer>> = {
+  internet: (controls, open) => <InternetExplorer controls={controls} onOpen={open} />,
+  cv: (controls) => (
+    <Suspense fallback={null}>
+      <WordCV controls={controls} />
+    </Suspense>
+  ),
   "personal-details": (controls) => <Notepad controls={controls} content={NOTEPAD_CONTENT} />,
   wordpad: (controls) => <WordPad controls={controls} />,
   "my-computer": (controls) => <MyComputer controls={controls} />,
@@ -74,9 +87,10 @@ const renderers: Partial<Record<AppId, Renderer>> = {
 // the taskbar; spawn windows clear of them when the viewport has room, otherwise
 // fall back to a top-left cascade.
 const ICON_CELL = 75;
+const TASKBAR_H = 28;
 function iconColumnsWidth(): number {
   const vh = typeof window !== "undefined" ? window.innerHeight : 768;
-  const perColumn = Math.max(1, Math.floor((vh - 28) / ICON_CELL));
+  const perColumn = Math.max(1, Math.floor((vh - TASKBAR_H) / ICON_CELL));
   return Math.ceil(DESKTOP_ICONS.length / perColumn) * ICON_CELL;
 }
 function spawnPosition(index: number, width: number): { x: number; y: number } {
@@ -95,11 +109,18 @@ function spawnMaximized({ width, height }: { width: number; height: number }): b
   return window.innerWidth < width + 16 || window.innerHeight < height + 76;
 }
 
+// A `tall` window spawned at y runs down to the taskbar, or keeps its default height if that's taller.
+function spawnHeight(id: WindowId, y: number): number | undefined {
+  const { tall, defaultSize } = windowMeta(id);
+  if (!tall || typeof window === "undefined") return undefined;
+  return Math.max(defaultSize.height, window.innerHeight - TASKBAR_H - y);
+}
+
 export default function Desktop() {
   const topZ = useRef(1);
   const [wins, setWins] = useState<WinState[]>(() => {
-    // A /<id> or /docs/<slug> deep link opens straight into that window; otherwise land on Notepad.
-    const id = windowIdFromPath() ?? "personal-details";
+    // A /<id> or /docs/<slug> deep link opens straight into that window; otherwise land on the home page.
+    const id = windowIdFromPath() ?? "internet";
     const pos = spawnPosition(0, windowMeta(id).defaultSize.width);
     return [
       {
@@ -109,6 +130,7 @@ export default function Desktop() {
         z: 1,
         minimized: false,
         maximized: spawnMaximized(windowMeta(id).defaultSize),
+        height: spawnHeight(id, pos.y),
       },
     ];
   });
@@ -147,6 +169,7 @@ export default function Desktop() {
           z: topZ.current,
           minimized: false,
           maximized: spawnMaximized(windowMeta(id).defaultSize),
+          height: spawnHeight(id, pos.y),
         },
       ];
     });
@@ -178,7 +201,7 @@ export default function Desktop() {
 
   // Keep the URL in sync with the focused window so it's shareable as /<id> or
   // /docs/<slug>. We skip a plain "/" landing (don't rewrite it to the default
-  // Notepad's id); once the user opens or focuses anything, the address bar
+  // home page's id); once the user opens or focuses anything, the address bar
   // tracks the active window.
   const routed = useRef(windowIdFromPath() !== null);
   useEffect(() => {
@@ -213,6 +236,12 @@ export default function Desktop() {
         label: "&Programs",
         icon: "/img/win95/programs-32.png",
         submenu: [
+          {
+            label: "Microsoft &Internet Explorer",
+            icon: apps.internet.iconSmall,
+            onClick: () => openApp("internet"),
+          },
+          { label: "Microsoft W&ord", icon: apps.cv.iconSmall, onClick: () => openApp("cv") },
           { label: "&WordPad", icon: apps.wordpad.iconSmall, onClick: () => openApp("wordpad") },
           { label: "&Personal", icon: apps.personal.iconSmall, onClick: () => openApp("personal") },
           {
@@ -233,6 +262,7 @@ export default function Desktop() {
         label: "&Documents",
         icon: "/img/win95/documents-32.png",
         submenu: [
+          { label: CV_FILE_NAME, icon: "/img/cv/worddoc-16.png", onClick: () => openApp("cv") },
           {
             label: "personal-details.txt",
             icon: apps["personal-details"].iconSmall,
@@ -303,6 +333,7 @@ export default function Desktop() {
           active: w.id === activeId,
           minimized: w.minimized,
           initialMaximized: w.maximized,
+          initialHeight: w.height,
           onFocus: () => focusApp(w.id),
           onClose: () => closeApp(w.id),
           onMinimize: () => minimizeApp(w.id),

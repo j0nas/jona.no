@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import styles from "./StatusBar.module.css";
 
 // The size grip (Marlett "o"): three diagonal highlight/shadow ridges, drawn over
@@ -41,8 +41,20 @@ function Grip() {
 }
 
 /** One recessed (sunken-thin) pane within a status bar. */
-function Field({ children, grow = false }: { children?: ReactNode; grow?: boolean }) {
-  return <div className={`${styles.field}${grow ? ` ${styles.grow}` : ""}`}>{children}</div>;
+function Field({
+  children,
+  grow = false,
+  style,
+}: {
+  children?: ReactNode;
+  grow?: boolean;
+  style?: CSSProperties;
+}) {
+  return (
+    <div className={`${styles.field}${grow ? ` ${styles.grow}` : ""}`} style={style}>
+      {children}
+    </div>
+  );
 }
 
 /**

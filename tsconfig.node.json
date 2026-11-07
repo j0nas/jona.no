@@ -21,5 +21,10 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts", "worker/apps.ts"]
+  "include": [
+    "vite.config.ts",
+    "vite-cv-downloads.ts",
+    "worker/apps.ts",
+    "src/apps/word/downloads/*.ts"
+  ]
 }

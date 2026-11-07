@@ -10,6 +10,10 @@ const ALIASES: Record<string, AppId> = {
   "my computer": "my-computer",
   "recycle bin": "recycle-bin",
   recycled: "recycle-bin",
+  iexplore: "internet",
+  "the internet": "internet",
+  winword: "cv",
+  word: "cv",
 };
 
 export type RunTarget = { window: WindowId } | { url: string };

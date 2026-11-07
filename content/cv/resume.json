@@ -1,0 +1,236 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
+  "basics": {
+    "name": "Jonas Jensen",
+    "label": "Senior full-stack developer · TypeScript, React, Node, Kotlin",
+    "email": "jonas.jensen@msn.com",
+    "url": "https://jona.no",
+    "summary": "I've been a developer for ten years, and coding since I was 12. Much of that time has gone into taking over systems that had become hard to change: I moved Norway's national encyclopedia (2.9 million readers a month) to the cloud and spent four years on Ruter's transport for people with disabilities. I also go and meet the people who use what I build. At Ruter, interviews with schools and daycare centres led to two new apps. What matters to me is the end result. Language models now let me build far more of it, and my experience tells me what to ask for and how to judge what comes back.",
+    "location": {
+      "city": "Oslo",
+      "region": "Oslo",
+      "countryCode": "NO"
+    },
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "username": "j0nas",
+        "url": "https://www.linkedin.com/in/j0nas/"
+      },
+      {
+        "network": "GitHub",
+        "username": "j0nas",
+        "url": "https://github.com/j0nas"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "Own projects",
+      "position": "Learning and building with language models",
+      "startDate": "2026-06",
+      "summary": "Since my Ruter contract ended I've been developing my skills and experimenting with language models and agentic development, across around 40 projects large and small. I'd gladly talk anyone's ear off about it if given the chance.",
+      "highlights": [
+        "I'm building Formeriet, a web store for made-to-measure products that I print or laser-cut myself. Customers type in their measurements and see the result in a live 3D viewer, and the same code produces the price and the print files. It hasn't launched yet, and I haven't seen the idea elsewhere in Norway.",
+        "Earlier this year I took Pep to a working beta: a hosting platform where a coding agent deploys an app through MCP, the standard way for agents to call tools, and gets back a live URL. I shelved it before it had users.",
+        "Touchup lets non-developers comment on or edit a live site from their phone. A coding agent picks up the notes, fixes the source and replies on the page.",
+        "I ran a local model as a code compiler to find where verification breaks, and gave a voice-controlled Hacker News reader a small local model with an evaluation suite. In a used hi-fi deal monitor, deterministic code decides and a local model only reads the listings.",
+        "For running coding agents I built a tool that plans work against usage limits, per-project session logs and a fresh-context agent loop. I'm also learning Rust from a course taught by a Claude tutor.",
+        "I rescue old Kindles. Amazon cut off models from 2012 and earlier this year, so I jailbreak them, install KOReader and write plugins that let them do what a Raspberry Pi with an e-ink screen can: a summarised news page and my task list on the sleep screen, and a chat with a local model on a Kindle Keyboard. It keeps them working and out of landfill.",
+        "I reverse-engineered a Silhouette card cutter's Bluetooth protocol and firmware to write my own driver for it, as part of a pipeline that turns a deck list into cut sheets of proxy Magic cards.",
+        "I've built browser tools for making things: a lamp shade designer that previews the shadows on a wall, a laminate floor planner, stackable tray generators for 3D printers and laser cutters, and deck box builders.",
+        "I designed a pantry workstation for my 3D printer and laser in Fusion, with 214 bodies and a WebXR page for viewing it 1:1 on a Quest 3, and built a Raspberry Pi e-ink board that shows bus departures and the weather.",
+        "There's more: a Magic: The Gathering deck-building assistant, a 3D game in Godot about sorting screws, a Whisper-based subtitle checker, keyboard shortcut sheets that match your layout, and a collaborative Steam game list for LAN parties."
+      ]
+    },
+    {
+      "name": "Ruter AS / Tet Digital",
+      "position": "Full-stack consultant",
+      "startDate": "2022-08",
+      "endDate": "2026-06",
+      "summary": "Ruter runs public transport in Oslo and Akershus, and its development side became the subsidiary Tet Digital in 2024. I worked on demand-responsive transport (tilrettelagt transport) for people with disabilities who can't use ordinary public transport, with nearly 900,000 trips in 2022. I was a consultant through my company, Code Green AS, in a self-directed team of 5 to 10, and ended up as its de facto tech lead and one of the longest-serving people there.",
+      "highlights": [
+        "Early on I tracked down random backend crashes that gave customer service daily trouble and that nobody on the team had been able to explain. They came from the hosting setup, so I moved the backend to a more stable one. The product lead promised cake to whoever fixed them. I'm still waiting.",
+        "The team had no CI and few tests when I joined. I set up CI and pushed for linters and automated tests until they were simply how we worked. Near the end I cut test runs from about 45 minutes to about 15.",
+        "Most of my time went on the backend that connects the customer-facing apps to a third-party planning system.",
+        "For a while I was brought onto another team to start a new Kotlin backend. What I built became the foundation of the service that hides the differences between demand-responsive transport providers.",
+        "On my own initiative I started interviewing the schools and daycare centres at the other end of these trips. That led to two new apps: a daily overview of trips for those institutions, and a replacement for a partly broken school transport app that nobody knew how to update. We were onboarding users when I left. Ruter's school transport carries more than 4,000 children a day.",
+        "I was the team's Security Champion and main DevOps person, and worked on its move to Kubernetes. Otherwise I was its utility player, in TypeScript, React, Node and Kotlin."
+      ]
+    },
+    {
+      "name": "Brokerwall AS (Rellio)",
+      "url": "https://www.rellio.no",
+      "position": "Co-founder and CTO",
+      "startDate": "2022-12",
+      "endDate": "2025-08",
+      "summary": "Rellio helps real estate agents run a property sale from assignment to sale, in a workspace shared with the seller, photographers, appraisers and home stagers. I started it with a real estate photographer of more than 20 years, and built it in the evenings and at weekends alongside full-time consulting.",
+      "highlights": [
+        "Real estate agents planned each sale on a shared calendar with the seller and suppliers. They prepared listing photos, including AI virtual staging, and could question uploaded documents through a language model.",
+        "By the time I left it was about 56,000 lines of TypeScript, most of them mine, with two-way sync to Google and Microsoft calendars and to Vitec Next, one of the main systems real estate agents in Norway work in.",
+        "I directed and reviewed the work of several outside developers.",
+        "I worked directly with about five real estate agents on what to build, ran user testing, and tried my hand at sales. We had real users, and people paid to use its neighbourhood photos.",
+        "I left in 2025 after nearly three years and handed the code base and ownership to my co-founder. The product carries on as Rellio."
+      ]
+    },
+    {
+      "name": "Minus AS",
+      "url": "https://minus.no",
+      "position": "Full-stack consultant",
+      "startDate": "2019-04",
+      "endDate": "2022-07",
+      "summary": "Minus is a small Oslo consultancy. Most of my time went to Store norske leksikon (snl.no), Norway's national encyclopedia, with 2.9 million readers a month in 2021.",
+      "highlights": [
+        "I led a team of two or three on snl.no, with main responsibility for running and developing it. I learned Ruby on Rails for the job, and within three months was writing the idiomatic Rails the code base had been missing.",
+        "With one other developer I moved it from on-premise servers to Google Cloud and rewrote it as a multi-tenant application, so Denmark's national encyclopedia, lex.dk, could move onto it.",
+        "I took sanity.io's Lighthouse score from 35 to 85+ by finding and fixing its performance problems.",
+        "For AP-Performance, which makes a training diary for personal trainers and their clients, I rebuilt a legacy Android app in React Native on my own and published it to both app stores. I also moved their PHP web app and database to Google Cloud, and did the same for Foodsteps, a Norwegian cooking app, using Terraform."
+      ]
+    },
+    {
+      "name": "Greenbird Integration Technology",
+      "position": "Senior Software Engineer",
+      "startDate": "2018-06",
+      "endDate": "2019-02",
+      "summary": "Greenbird makes integration software for energy utilities, and was a Gartner Cool Vendor in 2018.",
+      "highlights": [
+        "I was the company's frontend lead, and for a long while the only frontend developer on its in-house products. I built the UI for most of them, including its integration platform for the energy sector.",
+        "I was promoted to Senior after a year, two years after graduating.",
+        "I chose the frontend technology and practices, and did the data visualisation and visual identity too.",
+        "For Oslo Metropolitan University I worked with end users to build a system for tracking grant applications, and mentored others on the project."
+      ]
+    },
+    {
+      "name": "Greenbird Integration Technology",
+      "position": "Software Engineer",
+      "startDate": "2017-06",
+      "endDate": "2018-06"
+    },
+    {
+      "name": "Netcompany A/S",
+      "position": "Analyst and full-stack developer",
+      "startDate": "2016-08",
+      "endDate": "2017-05",
+      "summary": "In my first job after graduating I was frontend lead for a team of about five at Møller Mobility Group, a Norwegian car importer and dealer group, in React, Redux, Node and Java.",
+      "highlights": [
+        "I visited used-car centres and interviewed the staff to learn how the process worked, then built the system that tracks where each car is and what's been done to it.",
+        "I started a shared library of UI components and mentored others on the team.",
+        "My bachelor's thesis for Møller was a web application to partly replace a legacy system, built with UX designers and end users. I owned the frontend and finished it after graduating."
+      ]
+    },
+    {
+      "name": "Netcompany A/S",
+      "position": "Bachelor thesis",
+      "startDate": "2016-01",
+      "endDate": "2016-06"
+    },
+    {
+      "name": "Westerdals Oslo ACT",
+      "position": "Programming tutor",
+      "startDate": "2014-08",
+      "endDate": "2015-12",
+      "summary": "I tutored students and gave revision lectures in programming courses."
+    },
+    {
+      "name": "Forbrukerrådet (Norwegian Consumer Council)",
+      "position": "IT apprentice, then IT support",
+      "startDate": "2011-07",
+      "endDate": "2013-07",
+      "summary": "I ran IT operations and first-line support, and earned a trade certificate as a computer electronics technician."
+    }
+  ],
+  "education": [
+    {
+      "institution": "Westerdals Oslo ACT",
+      "studyType": "Bachelor's degree",
+      "area": "Information Technology, specialising in programming",
+      "startDate": "2013",
+      "endDate": "2016"
+    },
+    {
+      "institution": "Forbrukerrådet",
+      "studyType": "Fagbrev (Norwegian trade certificate)",
+      "area": "Computer electronics",
+      "endDate": "2012-12"
+    }
+  ],
+  "certificates": [
+    {
+      "name": "Certified CyberSecurity Professional – Web Security",
+      "issuer": "Watchcom Security Group AS",
+      "date": "2017-01"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Programming",
+      "keywords": ["TypeScript", "JavaScript", "Kotlin", "Ruby", "Java", "SQL"]
+    },
+    {
+      "name": "Frontend",
+      "keywords": ["React", "Next.js", "React Native", "Redux"]
+    },
+    {
+      "name": "Backend",
+      "keywords": ["Node.js", "Ruby on Rails", "GraphQL", "PostgreSQL", "MySQL"]
+    },
+    {
+      "name": "Infrastructure",
+      "keywords": [
+        "Google Cloud",
+        "Cloudflare Workers",
+        "Kubernetes",
+        "Docker",
+        "Terraform",
+        "CI/CD",
+        "NGINX",
+        "Varnish",
+        "Linux"
+      ]
+    },
+    {
+      "name": "Language models",
+      "keywords": ["Coding agents", "MCP", "Local models", "Evaluation"]
+    },
+    {
+      "name": "Practices",
+      "keywords": ["User research", "Automated testing", "Web security"]
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "fluency": "native"
+    },
+    {
+      "language": "Norwegian",
+      "fluency": "native"
+    },
+    {
+      "language": "Russian",
+      "fluency": "professional working"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Parametric 3D editor",
+      "url": "https://github.com/j0nas/parametric-3d-editor",
+      "description": "A browser-based CAD editor for custom 3D-printed products, built on OpenCASCADE compiled to WebAssembly."
+    },
+    {
+      "name": "edh.land",
+      "url": "https://edh.land",
+      "description": "Suggests cards for Magic: The Gathering Commander decks, ranking highest the cards that pair with several already in the deck."
+    },
+    {
+      "name": "Floor Planner",
+      "url": "https://jona.no/floor-planner",
+      "description": "Works out the best layout for a laminate floor, including the cut list."
+    },
+    {
+      "name": "jona.no",
+      "url": "https://jona.no",
+      "description": "My personal site, a Windows 95 desktop in React with its own component library."
+    }
+  ]
+}

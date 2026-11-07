@@ -1,0 +1,30 @@
+/*
+ * Printing the CV. While the CV window is focused its sheets also sit in a [data-cv-print] element
+ * right under <body> (WordCV.tsx); on paper that element is the whole page and everything else
+ * on the desktop goes away. Not a module: these rules have to reach html, body and #root.
+ */
+[data-cv-print] {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  html:has(body > [data-cv-print]),
+  body:has(> [data-cv-print]) {
+    height: auto;
+    overflow: visible;
+    background: none;
+  }
+
+  body:has(> [data-cv-print]) > :not([data-cv-print]) {
+    display: none !important;
+  }
+
+  [data-cv-print] {
+    display: block;
+  }
+}

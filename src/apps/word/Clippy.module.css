@@ -1,0 +1,150 @@
+/*
+ * The Office Assistant as Word 97 draws him, sampled from a 1:1 capture (SOURCES.md §Word 97): a
+ * tool window with a 15px caption and only a close box over a grey-gradient stage, and the balloon
+ * above it, #ffffcf in a 1px black outline. Anchored in the workspace, so he can't leave the window.
+ */
+.assistant {
+  position: absolute;
+  z-index: 5;
+  right: 20px;
+  bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.window {
+  flex: 0 0 auto;
+  padding: 4px;
+  background: var(--w95-3d-face);
+  box-shadow: var(--w95-bevel-raised);
+}
+
+.caption {
+  display: flex;
+  justify-content: flex-end;
+  height: 15px;
+  margin-bottom: 1px;
+  background: var(--w95-active-title);
+}
+
+/* The little caption's close box (SM_CXSMSIZE), its X the capture's. */
+.close {
+  width: 13px;
+  height: 11px;
+  margin: 2px 2px 0 0;
+  padding: 0;
+  border: 0;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='5' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h2v1H0zM4 0h2v1H4zM1 1h1v1H1zM4 1h1v1H4zM2 2h2v1H2zM1 3h1v1H1zM4 3h1v1H4zM0 4h2v1H0zM4 4h2v1H4z'/%3E%3C/svg%3E")
+      center no-repeat,
+    var(--w95-3d-face);
+  box-shadow: var(--w95-bevel-raised-soft);
+}
+
+.stage {
+  position: relative;
+  width: 124px;
+  height: 93px;
+  background: linear-gradient(170deg, #606760, #909790 30%, #c0c0c0 62%, #e8e8e8);
+  overflow: hidden;
+}
+
+/* clippyjs positions its element fixed in the viewport and writes top/left as it goes; static, it
+   ignores all that and just sits in the stage. */
+.stage > div {
+  position: static !important;
+}
+
+.balloon {
+  position: relative;
+  width: 190px;
+  margin-bottom: 9px;
+  padding: 7px 8px 6px;
+  border: 1px solid #000000;
+  border-radius: 6px;
+  background: #ffffcf;
+  color: #000000;
+}
+
+/* The tail, down to his window. */
+.balloon::before,
+.balloon::after {
+  content: "";
+  position: absolute;
+  right: 80px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.balloon::before {
+  bottom: -9px;
+  border-width: 9px 0 0 9px;
+  border-color: #000000 transparent transparent;
+}
+
+.balloon::after {
+  right: 81px;
+  bottom: -7px;
+  border-width: 7px 0 0 7px;
+  border-color: #ffffcf transparent transparent;
+}
+
+.title {
+  margin: 0 0 7px;
+  font-weight: 700;
+  line-height: 13px;
+}
+
+.address {
+  margin: 0 0 7px;
+  line-height: 13px;
+  cursor: text;
+  user-select: text;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  margin: 0 0 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #000000;
+  line-height: 13px;
+  text-align: left;
+  text-decoration: none;
+}
+
+.option:hover span {
+  color: #000080;
+}
+
+.option:focus-visible span,
+.pill:focus-visible span {
+  outline: 1px dotted #000000;
+}
+
+.rule {
+  height: 1px;
+  margin: 7px 0 6px;
+  border: 0;
+  background: #c0c0c0;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 0 auto;
+  padding: 2px 12px;
+  border: 1px solid #b0b0b0;
+  border-radius: 10px;
+  background: none;
+  color: #000000;
+  line-height: 13px;
+}

@@ -1,0 +1,267 @@
+/*
+ * Internet Explorer 3.02's chrome (SOURCES.md §Internet Explorer 3). Bitmaps are shdocvw.dll's
+ * own resources; the geometry is sampled from two 1:1 captures: the coolbar is one bitmap tiled
+ * from 2px in, cut by etched grooves (1px SHADOW then 1px HIGHLIGHT, the same way round on every
+ * side), with a 40px toolbar band over a 26px address band.
+ */
+.coolbar {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 2px;
+  background: var(--w95-3d-face) url("/img/home/ie3-coolbar.png") 2px 2px;
+  box-shadow:
+    inset 0 1px 0 var(--w95-3d-shadow),
+    inset 1px 0 0 var(--w95-3d-shadow),
+    inset 0 2px 0 var(--w95-3d-highlight),
+    inset 2px 0 0 var(--w95-3d-highlight),
+    inset 0 -1px 0 var(--w95-3d-highlight),
+    inset -1px 0 0 var(--w95-3d-highlight),
+    inset 0 -2px 0 var(--w95-3d-shadow),
+    inset -2px 0 0 var(--w95-3d-shadow);
+}
+
+.toolbarBand {
+  display: flex;
+  height: 40px;
+}
+
+.addressBand {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 26px;
+  margin-top: 2px;
+}
+
+.addressBand::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(var(--w95-3d-shadow) 50%, var(--w95-3d-highlight) 50%);
+}
+
+/* A band's gripper: two 3px ridges (BDR_RAISEDINNER), 2px in from the band's top, bottom and left. */
+.grip {
+  display: flex;
+  flex: 0 0 auto;
+  align-self: stretch;
+  margin: 2px 0 2px 2px;
+}
+
+.grip::before,
+.grip::after {
+  content: "";
+  width: 3px;
+  background: var(--w95-3d-face);
+  box-shadow:
+    inset -1px -1px 0 var(--w95-3d-shadow),
+    inset 1px 1px 0 var(--w95-3d-highlight);
+}
+
+.tools {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  /* Cut off at the band's end when the window is narrower than the buttons, as a rebar does. The
+     clip stops above an open Favorites menu, which needs to hang below the band. */
+  overflow-x: clip;
+  overflow-y: visible;
+  padding-left: 4px;
+}
+
+.toolSlot {
+  position: relative;
+  flex: 0 0 50px;
+}
+
+/* 50×40; the 30×20 cell 3px down, the label straight under it with its caps at +26. */
+.tool {
+  display: block;
+  width: 50px;
+  height: 40px;
+  padding: 3px 0 0;
+  border: 0;
+  background: none;
+  color: var(--w95-window-text);
+  text-align: center;
+}
+
+.toolIcon {
+  display: block;
+  width: 30px;
+  height: 20px;
+  margin: 0 auto;
+  background: url("/img/home/ie3-toolbar.png") 0 0 no-repeat;
+}
+
+.toolLabel {
+  display: block;
+  line-height: 13px;
+}
+
+/* Cold (grey) at rest, hot (colour) under the pointer, as IE3's coolbar does. */
+.tool:hover:not(:disabled) .toolIcon {
+  background-position-y: -20px;
+}
+
+.tool:hover:not(:disabled) {
+  box-shadow:
+    inset 1px 1px 0 var(--w95-3d-highlight),
+    inset -1px -1px 0 var(--w95-3d-shadow);
+}
+
+.tool:active:not(:disabled) {
+  padding: 4px 0 0 1px;
+  box-shadow:
+    inset 1px 1px 0 var(--w95-3d-shadow),
+    inset -1px -1px 0 var(--w95-3d-highlight);
+}
+
+.tool:disabled .toolIcon {
+  background-position-y: -40px;
+}
+
+.tool:disabled .toolLabel {
+  color: var(--w95-gray-text);
+  text-shadow: 1px 1px 0 var(--w95-3d-highlight);
+}
+
+.toolMenu {
+  top: 40px;
+  left: 0;
+  z-index: 20;
+}
+
+/* The throbber's cell: 41×40, black, after a groove; the 38×38 filmstrip frame at (1,1). */
+.throbber {
+  position: relative;
+  flex: 0 0 43px;
+  padding: 0 0 0 2px;
+  border: 0;
+  background: linear-gradient(
+    90deg,
+    var(--w95-3d-shadow) 1px,
+    var(--w95-3d-highlight) 1px 2px,
+    #000000 2px
+  );
+}
+
+.throbberFrame {
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  width: 38px;
+  height: 38px;
+  background: url("/img/home/ie3-throbber.png") 0 0 no-repeat;
+}
+
+/* The frame time isn't documented; 100ms a frame is by eye. */
+.throbbing .throbberFrame {
+  animation: throb 4.6s steps(46) infinite;
+}
+
+@keyframes throb {
+  to {
+    background-position-y: -1748px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .throbbing .throbberFrame {
+    animation: none;
+  }
+}
+
+.addressLabel {
+  flex: 0 0 auto;
+  padding: 0 4px 0 5px;
+  line-height: 13px;
+}
+
+/* A 22px combo box: the sunken edge, a white field and the 16px raised arrow button. */
+.combo {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  margin-right: 4px;
+  padding: 2px;
+  background: var(--w95-window);
+  box-shadow: var(--w95-bevel-sunken);
+}
+
+.comboInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0 0 0 2px;
+  border: 0;
+  background: none;
+  color: var(--w95-window-text);
+  line-height: 13px;
+}
+
+.comboDrop {
+  flex: 0 0 16px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='4' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h7v1H0zM1 1h5v1H1zM2 2h3v1H2zM3 3h1v1H3z'/%3E%3C/svg%3E")
+      center no-repeat,
+    var(--w95-3d-face);
+  box-shadow: var(--w95-bevel-raised);
+}
+
+/* The Links band lines up with the throbber's groove. */
+.linksBand {
+  position: relative;
+  display: flex;
+  flex: 0 0 41px;
+  align-items: center;
+  align-self: stretch;
+  margin-left: 2px;
+  box-shadow: -1px 0 0 var(--w95-3d-highlight);
+}
+
+.linksBand::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -2px;
+  width: 1px;
+  background: var(--w95-3d-shadow);
+}
+
+.linksLabel {
+  overflow: hidden;
+  padding-left: 5px;
+  line-height: 13px;
+}
+
+/* Below the coolbar: 3px of face, then the page in the sunken client edge. */
+.viewport {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  margin-top: 3px;
+  padding: 2px;
+  background: var(--w95-window);
+  box-shadow: var(--w95-bevel-sunken);
+}
+
+.page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+/* A phone-width window has room for neither the Links band nor every button. */
+@media (max-width: 480px) {
+  .linksBand {
+    display: none;
+  }
+}

@@ -184,10 +184,13 @@
  * (4,6) up/down, 4×7 at (5,4) left and (6,4) right. A held arrow button goes
  * flat (1px shadow ring) and its glyph moves 1px down-right. Rendered with the
  * WebKit/Blink scrollbar pseudo-elements; Firefox falls back to the flat
- * themed colours below.
+ * themed colours below, which only it may see: Chromium drops the pseudo-elements
+ * as soon as scrollbar-color is set.
  */
-.w95 {
-  scrollbar-color: var(--w95-3d-face) var(--w95-window);
+@supports not selector(::-webkit-scrollbar) {
+  .w95 {
+    scrollbar-color: var(--w95-3d-face) var(--w95-window);
+  }
 }
 
 .w95 ::-webkit-scrollbar,
@@ -211,6 +214,7 @@
 
 .w95 ::-webkit-scrollbar-button,
 .w95::-webkit-scrollbar-button {
+  display: block;
   background-color: var(--w95-3d-face);
   box-shadow: var(--w95-bevel-raised);
   background-repeat: no-repeat;

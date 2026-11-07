@@ -1,0 +1,367 @@
+/*
+ * Word 97's chrome, sampled from 1:1 captures (SOURCES.md §Word 97). Office 97 command bars: each
+ * a raised 1px outline with a double-ridge gripper and flat buttons that lift under the pointer,
+ * above the document's sunken client edge.
+ */
+.word {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--w95-3d-face);
+}
+
+.menuBar,
+.toolbar {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-width: 0;
+  background: var(--w95-3d-face);
+  box-shadow:
+    inset -1px -1px 0 var(--w95-3d-shadow),
+    inset 1px 1px 0 var(--w95-3d-highlight);
+}
+
+/* The menu bar's popups have to hang out over the toolbars below it. */
+.menuBar {
+  z-index: 2;
+  height: 23px;
+  padding-left: 4px;
+}
+
+.toolbar {
+  z-index: 1;
+  height: 26px;
+  padding-left: 4px;
+  overflow: hidden;
+}
+
+.grip {
+  display: flex;
+  flex: 0 0 auto;
+  align-self: stretch;
+  margin: 2px 1px 2px 0;
+}
+
+.grip::before,
+.grip::after {
+  content: "";
+  width: 3px;
+  background: var(--w95-3d-face);
+  box-shadow:
+    inset -1px -1px 0 var(--w95-3d-shadow),
+    inset 1px 1px 0 var(--w95-3d-highlight);
+}
+
+.docIcon {
+  flex: 0 0 auto;
+  margin: 0 2px 0 2px;
+}
+
+.separator {
+  flex: 0 0 2px;
+  align-self: stretch;
+  margin: 2px 1px 2px 2px;
+  background: linear-gradient(90deg, var(--w95-3d-shadow) 50%, var(--w95-3d-highlight) 50%);
+}
+
+.toolSlot {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.tool {
+  flex: 0 0 23px;
+  width: 23px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.toolGlyph {
+  display: block;
+  width: 23px;
+  height: 22px;
+  background: url("/img/cv/word-toolbar.png") 0 0 no-repeat;
+}
+
+.toolDrop {
+  flex-basis: 11px;
+  width: 11px;
+}
+
+.toolDrop .toolGlyph {
+  width: 11px;
+}
+
+.tool:hover:not(:disabled) {
+  box-shadow:
+    inset -1px -1px 0 var(--w95-3d-shadow),
+    inset 1px 1px 0 var(--w95-3d-highlight);
+}
+
+.tool:active:not(:disabled) {
+  box-shadow:
+    inset -1px -1px 0 var(--w95-3d-highlight),
+    inset 1px 1px 0 var(--w95-3d-shadow);
+}
+
+/* A button that's on: sunken over the HIGHLIGHT/face dither, as Justify is in the capture. */
+.toolOn {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='2'%3E%3Crect width='2' height='2' fill='%23c0c0c0'/%3E%3Crect width='1' height='1' fill='%23fff'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%23fff'/%3E%3C/svg%3E");
+  box-shadow:
+    inset -1px -1px 0 var(--w95-3d-highlight),
+    inset 1px 1px 0 var(--w95-3d-shadow);
+}
+
+/* Flat combos: a white field and arrow segment in a 1px white outline, 15px tall. */
+.combo {
+  display: flex;
+  flex: 0 0 auto;
+  height: 15px;
+  margin-right: 4px;
+  background: var(--w95-window);
+  box-shadow: inset 0 0 0 1px var(--w95-window);
+}
+
+.comboValue {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding-left: 2px;
+  line-height: 15px;
+  white-space: nowrap;
+}
+
+.comboDrop {
+  flex: 0 0 10px;
+  margin: 1px 1px 1px 0;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='5' height='3' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h5v1H0zM1 1h3v1H1zM2 2h1v1H2z'/%3E%3C/svg%3E")
+      center no-repeat,
+    var(--w95-3d-face);
+}
+
+/* The document, inside the sunken client edge: ruler, workspace, then the bottom scroll row. */
+.document {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 2px;
+  background: var(--w95-3d-face);
+  box-shadow: var(--w95-bevel-sunken);
+}
+
+/* Ruler: 5px of face, the 13px strip, 6px of face with the tab stops. */
+.ruler {
+  position: relative;
+  flex: 0 0 24px;
+  overflow: hidden;
+  background: var(--w95-3d-face);
+}
+
+.rulerTab {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 17px;
+  height: 17px;
+  background: url("/img/cv/word-ruler-tab.png");
+}
+
+.rulerStrip {
+  position: absolute;
+  top: 5px;
+  height: 13px;
+  background: var(--w95-window);
+}
+
+.rulerGrey {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--w95-3d-shadow);
+}
+
+.rulerTicks {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.rulerNumber {
+  position: absolute;
+  top: 0;
+  width: 16px;
+  margin-left: -8px;
+  color: var(--w95-window-text);
+  line-height: 13px;
+  text-align: center;
+}
+
+.rulerStop {
+  position: absolute;
+  top: 14px;
+  width: 1px;
+  height: 3px;
+  background: var(--w95-3d-shadow);
+}
+
+.rulerMarker,
+.rulerMarkerRight {
+  position: absolute;
+  background: url("/img/cv/word-ruler-marker.png") no-repeat;
+}
+
+/* The left-indent hourglass, from 3px above the strip to below it. */
+.rulerMarker {
+  top: -3px;
+  width: 10px;
+  height: 22px;
+}
+
+/* The right indent is the hourglass's lower triangle and box. */
+.rulerMarkerRight {
+  top: 4px;
+  width: 10px;
+  height: 9px;
+  background-position: 0 -7px;
+}
+
+.workspaceArea {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* The grey behind the page is COLOR_APPWORKSPACE (sampled #808080). */
+.workspace {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  background: var(--w95-3d-shadow);
+}
+
+/* The foot of the scroll bar belongs to .browse (below). */
+.workspace::-webkit-scrollbar-track {
+  margin-bottom: 64px;
+}
+
+.workspace::-webkit-scrollbar-button:vertical:end {
+  display: none;
+}
+
+/* Online layout view has no grey behind it and no pages to browse, so the bar keeps its own foot. */
+.workspaceOnline {
+  background: var(--w95-window);
+}
+
+.workspaceOnline::-webkit-scrollbar-track {
+  margin-bottom: 0;
+}
+
+.workspaceOnline::-webkit-scrollbar-button:vertical:end {
+  display: block;
+}
+
+.sheets {
+  padding: 24px 0 8px;
+}
+
+/* Word's own foot of the scroll bar, over the native bar's: down, previous, Select Browse Object, next. */
+.browse {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: var(--w95-scrollbar);
+}
+
+.browseButton {
+  display: block;
+  width: var(--w95-scrollbar);
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: var(--w95-3d-face) url("/img/cv/word-scroll-glyphs.png") 0 0 no-repeat;
+  box-shadow: var(--w95-bevel-raised);
+}
+
+.browseButton:active {
+  box-shadow: inset 0 0 0 1px var(--w95-3d-shadow);
+}
+
+/* The row under the workspace: the four view buttons, then a horizontal scroll bar with nothing to
+   scroll (the page is scaled to fit), its thumb filling the track. */
+.bottomRow {
+  display: flex;
+  flex: 0 0 16px;
+  min-width: 0;
+  padding-right: var(--w95-scrollbar);
+}
+
+.viewButton {
+  flex: 0 0 16px;
+  background: var(--w95-3d-face) url("/img/cv/word-scroll-glyphs.png") 0 0 no-repeat;
+  box-shadow: var(--w95-bevel-raised);
+}
+
+.viewOn {
+  background-color: transparent;
+  background-image:
+    url("/img/cv/word-scroll-glyphs.png"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='2'%3E%3Crect width='2' height='2' fill='%23c0c0c0'/%3E%3Crect width='1' height='1' fill='%23fff'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%23fff'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, repeat;
+  box-shadow: var(--w95-bevel-pressed);
+}
+
+.scrollEnd {
+  flex: 0 0 16px;
+  background: var(--w95-3d-face) no-repeat;
+  box-shadow: var(--w95-bevel-raised);
+}
+
+.scrollLeft {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='7' shape-rendering='crispEdges'%3E%3Cpath d='M3 0h1v1H3zM2 1h2v1H2zM1 2h3v1H1zM0 3h4v1H0zM1 4h3v1H1zM2 5h2v1H2zM3 6h1v1H3z'/%3E%3C/svg%3E");
+  background-position: 5px 4px;
+}
+
+.scrollRight {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='7' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1H0zM0 1h2v1H0zM0 2h3v1H0zM0 3h4v1H0zM0 4h3v1H0zM0 5h2v1H0zM0 6h1v1H0z'/%3E%3C/svg%3E");
+  background-position: 6px 4px;
+}
+
+.scrollThumb {
+  flex: 1;
+  min-width: 0;
+  background: var(--w95-3d-face);
+  box-shadow: var(--w95-bevel-raised);
+}
+
+/* The status bar's fields stand 5px apart, wider than a plain status bar's 2px. */
+.statusFields {
+  display: flex;
+  flex: 1;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+  padding-left: 5px;
+}
+
+.statusCell {
+  display: inline-block;
+  white-space: pre;
+}
+
+.statusOff {
+  color: var(--w95-gray-text);
+  text-shadow: 1px 1px 0 var(--w95-3d-highlight);
+}

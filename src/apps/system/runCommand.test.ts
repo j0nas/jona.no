@@ -7,6 +7,8 @@ describe("Start › Run", () => {
     expect(resolveRun("write")).toEqual({ window: "wordpad" });
     expect(resolveRun("floor-planner")).toEqual({ window: "floor-planner" });
     expect(resolveRun("Floor Planner")).toEqual({ window: "floor-planner" });
+    expect(resolveRun("IEXPLORE.EXE")).toEqual({ window: "internet" });
+    expect(resolveRun("winword")).toEqual({ window: "cv" });
   });
 
   test("opens web addresses", () => {

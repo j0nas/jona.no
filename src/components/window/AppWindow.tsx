@@ -10,6 +10,8 @@ export interface WindowControls {
   active: boolean;
   minimized: boolean;
   initialMaximized?: boolean;
+  /** Spawn this tall rather than the window's default height. */
+  initialHeight?: number;
   onFocus: () => void;
   onClose: () => void;
   onMinimize: () => void;
@@ -32,7 +34,7 @@ export default function AppWindow({ id, controls, menu, children }: AppWindowPro
       title={title}
       icon={iconSmall}
       width={defaultSize.width}
-      height={defaultSize.height}
+      height={controls.initialHeight ?? defaultSize.height}
       menu={menu}
       {...controls}
     >

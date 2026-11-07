@@ -200,6 +200,95 @@ Pixel grids in `glyphs.tsx`, `StatusBar.tsx` (size grip), `Dialog.tsx` (option b
 - Ctrl+Esc opens the Start menu.
 - The pointer is the RTM arrow (11×19, no shadow: pointer shadows are Win2000).
 
+## Internet Explorer 3 (`src/apps/internet/`)
+
+[S8] is the authority: **IE 3.02's own binaries**, 4.70.1300 from WinWorld
+(<https://winworldpc.com/product/internet-explorer/ie-30>), with `Iexplore.cab` unpacked and the PE
+resources read as data, never run. Geometry and placement are sampled from two captures:
+**[S9]** GUIdebook's Windows 95B browser shot, 480×321, 1:1 but in 16 colours
+(<https://guidebookgallery.org/screenshots/browser>), and **[S10]** WinWorld's 640×480 IE 3.02 shot
+in 256 colours, on the same page as the download.
+
+- **Coolbar bitmap** (`img/home/ie3-coolbar.png`): `shdocvw.dll` bitmap #259, 640×125, tiled from
+  (2,2) across both bands; that origin matches [S10] on 200/200 sampled pixels. A 16-colour display
+  draws the bands flat instead, which is why [S9] looks different.
+- **Toolbar** (`ie3-toolbar.png`): `shdocvw.dll` #261 (cold, grey) and #262 (hot, colour), 14 cells
+  of 30×20 keyed on magenta; Stop's red cell while loading is cell 12 of #261. The third row,
+  disabled, is generated (dark pixels as `SHADOW` over a `HIGHLIGHT` copy +1,+1) and matches Back and
+  Forward in [S9] on 600/600 pixels each.
+- **Throbber** (`ie3-throbber.png`): `shdocvw.dll` #267, a 46-frame 38×38 filmstrip on black, in a
+  41×40 cell at (+1,+1). **The frame time is a guess** (100ms); one pass is one "page load".
+- **Hand cursor** (`ie3-hand.png`): `mshtml.dll` cursor #45, hotspot (5,0), on the page's links only.
+- **Icons**: the desktop's `win95/internet-32.png` is `iexplore.exe` group 32528, 16-colour, and
+  matches "The Internet" on GUIdebook's Windows 95B desktop on every pixel. The caption and status
+  bar's `internet-16.png` is `shdocvw.dll` group 272, matching [S9] and [S10] exactly at (+2,+1).
+- **Metrics** [S9]: etched grooves of `SHADOW` then `HIGHLIGHT` around and between bands; a 40px
+  toolbar band and a 26px address band; grippers of two 3px raised ridges 2px in; 50×40 buttons
+  from +14, the cell at +3; a 22px combo box; 3px of face before the page's client edge; status
+  fields of the rest, 101px and 66px.
+- **Menus**: the strings are `shdocvw.dll` menus #256 and #258 and `mshtml.dll` #32515.
+- **The hot button's 1px raised bevel is from memory**: no capture shows the pointer on a button.
+
+## The home page's GIFs (`img/home/*.gif`)
+
+Period GIFs from GeoCities pages, found with GifCities (<https://gifcities.org>, the Internet
+Archive's search) and fetched from its store by checksum, picked for saying nothing about anyone.
+Total weight 84 KB. Listed so any of them can be traced back; URLs are as archived.
+
+| File                     | From                                                                    |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `globe-spinning.gif`     | `geocities.com/iciaos/globe.gif`                                        |
+| `under-construction.gif` | `geocities.com/picklel0af/UnderConstruction.gif`                        |
+| `digger.gif`             | `geocities.com/jpdetroitusa/CONSTRUCTION_ANIMEE.gif`                    |
+| `new-burst.gif`          | `geocities.com/angeljulie2/ani-new.gif`                                 |
+| `new-small.gif`          | `geocities.com/ardharn/new.gif`                                         |
+| `divider-rainbow.gif`    | `geocities.com/orcanut2002/rainbowspiral.gif`                           |
+| `divider-lights.gif`     | `uk.geocities.com/necnld/animatedrainbowline.gif`                       |
+| `divider-arrows.gif`     | `geocities.com/sweetdaphne86/A-rainbowbar2front.gif`                    |
+| `mailbox.gif`            | `geocities.com/RainForest/4627/icons/email6.gif`                        |
+| `ball.gif`               | `geocities.com/visoka123/images/bluered.gif`                            |
+| `guestbook.gif`          | `geocities.com/greatsunjester/signguestbook.gif`                        |
+| `computer.gif`           | `geocities.com/lavoiep66/computer.gif`                                  |
+| `stars.gif`              | `hk.geocities.com/robertoyip/stars.gif`; `stars-still.gif` is frame one |
+
+`badge-*.gif` are 88×31 buttons from <https://cyber.dabamos.de/88x31/>, same names:
+`msexplorer`, `built_notepad`, `mspaint`, `800x600`, `anybrowser2`, `win95`.
+
+## Word 97 (`src/apps/word/`)
+
+**[S11]** WinWorld's two 640×480 Word 97 captures on Windows 95, 256 colours, 1:1
+(<https://winworldpc.com/product/microsoft-word/97>): the Letter Wizard shot (toolbars, page, status
+bar, the Assistant's balloon) and the About shot (the ruler). No Word 97 binaries were used.
+
+- **Toolbar buttons** (`img/cv/word-toolbar.png`): every button cut from [S11] as a 23×22 cell,
+  face colour keyed out, disabled looks included (Cut, Copy, Redo, Excel). Justify was captured
+  pressed, so its dither and bevel are keyed away too; a button that's on gets them back in CSS.
+- **Command bars** [S11]: a 1px raised outline; a 23px menu bar and 26px toolbars; a gripper of two
+  3px ridges from +4; separators of `SHADOW` and `HIGHLIGHT`; flat 15px combos 90, 110 and 35px
+  wide (Style, Font, Size) and 52px (Zoom). The menu bar's document icon is Winword #2. **A
+  lifting and sinking button or menu title is from memory**: the captures don't show the pointer on
+  one. So is the menus' content, unlike IE's, and their real toolbar icons aren't drawn.
+- **Ruler** [S11]: 5px of face, a 13px strip, 6px of face; eighth-inch ticks 12px apart, 2px tall;
+  half inches 5px; tab stops 3px below it. The indent marker (`word-ruler-marker.png`) and tab
+  selector are cut from the capture. **The grey over the margins is from memory**, since [S11]'s ruler
+  is in normal view.
+- **Workspace** [S11]: `#808080`; the page a 1px black edge, 3px on the right and below.
+- **View buttons, Select Browse Object** (`word-scroll-glyphs.png`): glyphs cut from [S11] and put on
+  `EDGE_RAISED` buttons. The horizontal scroll bar is drawn with nothing to scroll: the page always
+  fits.
+- **Status bar** [S11]: fields 182, 159, 27, 24, 25, 26, 28, 44 and 35px, 5px apart.
+- **Office Assistant** [S11]: a window with a 15px caption and close box, a stage gradient
+  through sampled greys; the balloon `#ffffcf`, 1px black, its bullet (`clippy-bullet.png`) cut from
+  the capture. **The sprite isn't Word 97's**: `clippyjs`'s Clippy (`clippy-map.png`,
+  `clippy-agent.json`) is the later Microsoft Agent one, 124×93, where Word 97's stage is 92×68.
+  Those two files are clippyjs 0.1.0's agent module, repacked to the 13 animations used, without
+  sound, for 339 KB against its 1.3 MB.
+- **Icons**: Winword #1 (the caption's W) and #2 (the file's icon), `@react95/icons` v2.8.0 as in
+  [S7]. #2 matches [S11] exactly; #1 is cut from the same resource.
+- **The document's look**: Word 97's résumé templates are the idea, but **no copy of them or capture
+  was found**. The Times New Roman and Arial, thin rules and tabbed dates are from memory of
+  them.
+
 ## Win95-specific — where the "authentic" libraries half-ass it
 
 - **Title bars are SOLID navy `#000080`**. The gradient is Win98's `COLOR_GRADIENTACTIVECAPTION`.

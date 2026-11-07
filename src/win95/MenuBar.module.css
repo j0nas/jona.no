@@ -32,3 +32,19 @@
   top: 18px;
   left: 0;
 }
+
+/* Office 97 (SOURCES.md §Word 97): the same titles without the Win95 selection. */
+.flat .title:hover {
+  box-shadow:
+    inset -1px -1px 0 var(--w95-3d-shadow),
+    inset 1px 1px 0 var(--w95-3d-highlight);
+}
+
+.flat .titleOpen,
+.flat .titleOpen:hover {
+  background: none;
+  color: var(--w95-menu-text);
+  box-shadow:
+    inset -1px -1px 0 var(--w95-3d-highlight),
+    inset 1px 1px 0 var(--w95-3d-shadow);
+}
