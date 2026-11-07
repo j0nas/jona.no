@@ -199,16 +199,8 @@ export default function Desktop() {
     return visible.reduce((a, b) => (b.z > a.z ? b : a)).id;
   }, [wins]);
 
-  // Keep the URL in sync with the focused window so it's shareable as /<id> or
-  // /docs/<slug>. We skip a plain "/" landing (don't rewrite it to the default
-  // home page's id); once the user opens or focuses anything, the address bar
-  // tracks the active window.
-  const routed = useRef(windowIdFromPath() !== null);
+  // Keep the URL in sync with the focused window so it's shareable as /<id> or /docs/<slug>.
   useEffect(() => {
-    if (!routed.current) {
-      routed.current = true;
-      return;
-    }
     syncPath(activeId);
   }, [activeId]);
 

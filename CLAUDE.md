@@ -11,7 +11,8 @@ component library in `src/win95/`. There are two kinds of "apps" on the desktop:
 - **Built-in apps** — written against `src/win95/` (Internet Explorer, Word, Notepad, WordPad, My
   Computer, …). Each renders its body inside an `AppWindow` and is wired in
   `src/components/desktop/Desktop.tsx`. `/` opens the Internet Explorer window (`internet`, my
-  home page, `src/apps/internet/`); the Notepad stays at `/personal-details`.
+  home page, `src/apps/internet/`), and that window keeps that address, with `/internet` opening it
+  too; the Notepad stays at `/personal-details`.
 - **Documents** — markdown files in `content/docs/`, shown read-only in a WordPad window
   and listed in the desktop's Documents folder and Start › Documents. See "Adding a
   document".
@@ -79,7 +80,9 @@ whole (a section's heading stays with its first entry, an employer's with what's
 last two bullets together, as do the early jobs with no bullets and the document's last two
 sections), measured off screen, and dealt onto pages (`paginate`) before first
 paint. The space above a block drops away at the top of a page, and each page's footer sits in the
-bottom margin, below what `paginate` fills. Printing prints those same sheets. While the window is
+bottom margin, below what `paginate` fills. Only the document can be selected: the footers and
+Word's chrome have `user-select: none`, so a selection, a copy or a Touchup note across two sheets
+holds `resume.json`'s words and nothing else. Printing prints those same sheets. While the window is
 focused they're also in a `[data-cv-print]` element on `<body>`, and `print.css` makes that the
 whole page on paper, with `@page` at A4 and no margin. To check a change, Ctrl+P it to a PDF. A
 workspace under 600px wide, as on a phone, gets online layout view instead: the same blocks reflowed
@@ -149,8 +152,11 @@ hostname and action checks only run with the real keys.
 built-in or embedded — is shareable at `/<id>` (e.g. `/floor-planner`) and every document at
 `/docs/<slug>`, which opens the desktop with that window open. `Desktop` derives its initial
 window from the path and `replaceState`s the active window's id into the URL as windows
-open/focus/close. A window id _is_ its path (`WindowId` in `src/apps/registry.tsx`: an `AppId`
-or `docs/<slug>`), so there's no collision with the bare embedded builds at `/apps/<id>/`.
+open/focus/close, keeping the query and the fragment, which an invite link's script may not have
+read yet. A window id _is_ its path (`WindowId` in `src/apps/registry.tsx`: an `AppId`
+or `docs/<slug>`), except the home page, whose one address is `/`, so that a Touchup note on it
+stays on it whichever way it was opened. There's no collision with the bare embedded builds at
+`/apps/<id>/`.
 There's no router library and no per-app wiring — a new registry entry or markdown file is
 automatically deep-linkable.
 
