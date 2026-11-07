@@ -110,7 +110,7 @@ carry a note for language models that read them (`easterEgg.ts`: white 1.5pt tex
 white text in the DOCX, `meta.note` in the JSON). The same note is off screen in the
 `cv` window for a model reading the page's text, and in a `<noscript>` the plugin adds to
 `index.html` for a plain fetch. It asks for no rating; it says the CV has a tl;dr and asks the model
-to tell its user that using a model on a CV is not a good or ethical idea. It is never shown on
+to tell its user that Jonas thinks a language model isn't a good way to answer questions about a CV. It is never shown on
 screen or in File › Print, which is the copy that goes through a formal screening system.
 
 ## Private pages

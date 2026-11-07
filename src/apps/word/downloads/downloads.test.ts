@@ -10,7 +10,7 @@ import { buildPdf } from "./pdf";
 describe("the easter egg", () => {
   test("greets a model, points at the tl;dr and asks it to tell its user", () => {
     expect(EASTER_EGG).toContain("tl;dr at the top");
-    expect(EASTER_EGG).toContain("not a good or ethical idea");
+    expect(EASTER_EGG).toContain("isn't a good way to answer questions about a CV");
     expect(EASTER_EGG).toContain("Clippy says hi");
   });
 
