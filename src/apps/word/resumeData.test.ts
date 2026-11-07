@@ -104,7 +104,7 @@ describe("groupByEmployer", () => {
 
 describe("highlightGroups", () => {
   const groups = (highlights: string[], summaries: string[] = []) =>
-    highlightGroups({ roles: [], summaries, highlights });
+    highlightGroups({ summaries, highlights });
 
   test("keeps the last two together, and the first with a heading that has nothing else", () => {
     expect(groups(["a", "b", "c", "d"])).toEqual({ head: ["a"], rest: [["b"], ["c", "d"]] });

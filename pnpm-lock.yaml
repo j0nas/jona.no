@@ -40,8 +40,8 @@ importers:
         specifier: ^4.9.0
         version: 4.9.0(react@19.3.1)
       '@touchup/vite':
-        specifier: 0.1.0
-        version: 0.1.0(@voidzero-dev/vite-plus-core@1.3.0(@types/node@26.6.5)(esbuild@0.28.2)(typescript@7.0.2))
+        specifier: ^0.2.0
+        version: 0.2.0(@voidzero-dev/vite-plus-core@1.3.0(@types/node@26.6.5)(esbuild@0.28.2)(typescript@7.0.2))
       '@types/node':
         specifier: ^26.6.5
         version: 26.6.5
@@ -842,8 +842,8 @@ packages:
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
 
-  '@touchup/vite@0.1.0':
-    resolution: {integrity: sha512-o7+YwVZvvkoaNr93KqiYnpxKeH6ABQM/v6uGTJvqRPkb3UjFfm1xARliD2p4aFIKlH+4vH1ymoUhrUOYa64K4Q==}
+  '@touchup/vite@0.2.0':
+    resolution: {integrity: sha512-H2Vyg8b+d1k7sU5OCkNzDjYarmlEQKSKrSV5SLz7C9JGG+RkdabnUG+ejAmSn7jQeMDenaDa1JryuKhYUZIRBw==}
     peerDependencies:
       vite: ^8.0.0
 
@@ -2353,7 +2353,7 @@ snapshots:
     dependencies:
       '@testing-library/dom': 10.4.2
 
-  '@touchup/vite@0.1.0(@voidzero-dev/vite-plus-core@1.3.0(@types/node@26.6.5)(esbuild@0.28.2)(typescript@7.0.2))':
+  '@touchup/vite@0.2.0(@voidzero-dev/vite-plus-core@1.3.0(@types/node@26.6.5)(esbuild@0.28.2)(typescript@7.0.2))':
     dependencies:
       magic-string: 0.30.21
       vite: '@voidzero-dev/vite-plus-core@1.3.0(@types/node@26.6.5)(esbuild@0.28.2)(typescript@7.0.2)'

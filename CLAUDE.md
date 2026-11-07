@@ -95,8 +95,12 @@ text, as on a phone. His balloon opens when he arrives, if it too would clear th
 until it's dismissed; clicking him brings it back. Only closing his window is remembered.
 
 Review notes on the CV come through Touchup (README › Touchup). `node ../touchup/packages/cli/touchup.ts`
-lists the open ones. Each gives the exact words selected, so search for those in `resume.json`; the
-`source` line only names `Resume.tsx`.
+lists the open ones. A note on an element that shows one value of `resume.json` whole names that
+value with a field ref, `git:content/cv/resume.json#/work/1/highlights/2` (a JSON Pointer), and the
+commit the page was built from. `Resume.tsx` puts the refs on with `field()` from `@touchup/vite/field`,
+and an element that shows a new field whole gets one too. Dates, web addresses, the location, the heading
+of an employer with several roles and any text with a Markdown link show something other than the
+value as written, so they have none: for those, search `resume.json` for the words the note quotes.
 
 The CV is also a download: `/Jonas-Jensen-CV.pdf`, `.docx` and `.json` (JSON Resume), reached from
 Clippy's "Download this résumé" and from File › Save As, which gives the Word document. They are

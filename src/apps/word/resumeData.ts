@@ -194,10 +194,17 @@ export function groupByEmployer(work: Work[] = []): Employer[] {
  * An employer's highlights in the groups that stay whole on a page. The last two go together, so no
  * bullet ends up alone at the top of a page. `head` stays with the employer's heading, which needs
  * something under it: its summary will do, unless that would leave a lone highlight on its own.
+ * Generic, so the screen can group its highlights with each one's field ref.
  */
-export function highlightGroups({ summaries, highlights }: Employer): {
-  head: string[];
-  rest: string[][];
+export function highlightGroups<T>({
+  summaries,
+  highlights,
+}: {
+  summaries: string[];
+  highlights: T[];
+}): {
+  head: T[];
+  rest: T[][];
 } {
   const singles = highlights.slice(0, -2).map((highlight) => [highlight]);
   const groups = highlights.length ? [...singles, highlights.slice(-2)] : [];
@@ -205,11 +212,19 @@ export function highlightGroups({ summaries, highlights }: Employer): {
   return { head: groups[0] ?? [], rest: groups.slice(1) };
 }
 
+/** Which of studyType and area a school's line shows, the area alone when it already says the type. */
+export function studyKeys(school: Education): ("studyType" | "area")[] {
+  const { studyType, area } = school;
+  const keys: ("studyType" | "area")[] =
+    studyType && area?.includes(studyType) ? ["area"] : ["studyType", "area"];
+  return keys.filter((key) => school[key]);
+}
+
 /** "Bachelor's degree, IT"; "Bachelor's degree" and "Bachelor's degree in IT" don't need saying twice. */
-export function schoolStudy({ studyType, area }: Education): string {
-  return studyType && area?.includes(studyType)
-    ? area
-    : [studyType, area].filter(Boolean).join(", ");
+export function schoolStudy(school: Education): string {
+  return studyKeys(school)
+    .map((key) => school[key])
+    .join(", ");
 }
 
 /** Schools and certificates in one list, newest first; ISO dates sort as text, and undated go last. */

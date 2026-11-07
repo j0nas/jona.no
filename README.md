@@ -144,8 +144,12 @@ touchup.jona.no, comments only since the CV's text comes from `content/cv/resume
 origins `https://jona.no`, `http://localhost:5173` and `http://jonass-mbp:5173`. The last is for
 another device on the network, and needs `vp dev --host`.
 
-`@touchup/vite` stamps elements with where they're written, which for the CV is `Resume.tsx`, so the
-words of a note are what find it in `resume.json`. The agent's key is in the gitignored `.env`:
+`@touchup/vite` stamps elements with where they're written, which for the CV is `Resume.tsx`. It also
+tags what `resume.json` holds, so an element of the CV that shows one value whole names it
+(`data-touchup-field="git:content/cv/resume.json#/basics/summary"`), and `index.html` names the branch
+and commit it was built from (`<meta name="touchup-revision">`); a note on that element says which
+value it's about. For the rest, such as dates and text with a link in it, the words of a note are what
+find it in `resume.json`. The agent's key is in the gitignored `.env`:
 `node ../touchup/packages/cli/touchup.ts` lists the open notes, and Touchup's README has the routine
 and the line that adds its MCP server. The site sends no Content-Security-Policy to the desktop, so
 nothing needs adding there.
