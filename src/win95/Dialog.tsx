@@ -36,9 +36,14 @@ export default function Dialog({
       x: Math.max(0, Math.round((window.innerWidth - el.offsetWidth) / 2)),
       y: Math.max(0, Math.round((window.innerHeight - 28 - el.offsetHeight) / 2)),
     });
-    el.querySelector<HTMLElement>("[autofocus], input, button[type=submit]")?.focus();
     return () => dragEnd.current?.();
   }, []);
+
+  // Hidden until it has its position, and what's hidden can't take focus.
+  const placed = pos !== null;
+  useEffect(() => {
+    if (placed) ref.current?.querySelector<HTMLElement>("input, button[type=submit]")?.focus();
+  }, [placed]);
 
   function submit(event: FormEvent) {
     event.preventDefault();

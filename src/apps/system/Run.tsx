@@ -38,7 +38,6 @@ export default function Run({ onCancel, onRun }: RunProps) {
             spellCheck={false}
             type="text"
             autoComplete="off"
-            autoFocus
           />
         </label>
         <div className={styles.buttons}>
