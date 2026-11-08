@@ -1,36 +1,64 @@
-import { applyEdits, edits, liveEdits } from "./edits";
-import { feedback, ID } from "./feedback";
+import { esc, touchup, type AddedPhoto, type Touchup } from "./touchup/index.js";
 
 /**
  * Private pages: write-ups for a few people, kept out of this public repo. A page's files live in
  * the PRIVATE R2 bucket under "<slug>/" (uploaded from wherever the page is made, never committed
  * here) and are served at /<slug>/ to whoever has its password, a Worker secret. Every response
- * under /<slug> says noindex, the password form included. A page can have a second password
- * (`review`) for someone giving feedback on it, who can comment on it and edit it in place.
+ * under /<slug> says noindex, the password form included. A page can take part in Touchup
+ * (`touchup`): its HTML carries Touchup's script tag, which does something only for a reviewer
+ * with an invite link, and the edits reviewers have made are applied to it as it's served.
  */
 export interface PrivatePage {
   /** The Worker secret holding the page's password (listed in wrangler.jsonc's `secrets`). */
   password: Secret;
   /**
-   * A second password, for someone giving feedback on the page: it opens the same page with a
-   * layer on it (public/private/review.js) for leaving notes (worker/feedback.ts) and editing the
-   * page in place (worker/edits.ts). Edits show for everyone; notes only reach the page's maker.
+   * The page is a Touchup project with the slug as its id. `renderPhoto` is the page's own markup
+   * for a photo a reviewer added, which `block()` in the page's build.py makes for the others.
    */
-  review?: Secret;
+  touchup?: { renderPhoto: (photo: AddedPhoto) => string };
 }
 
 type Secret = { [K in keyof Env]: Env[K] extends string ? K : never }[keyof Env];
 
 export const PAGES: Record<string, PrivatePage> = {
-  pilestredet: { password: "PILESTREDET_PASSWORD", review: "PILESTREDET_REVIEW_PASSWORD" },
+  pilestredet: {
+    password: "PILESTREDET_PASSWORD",
+    touchup: {
+      renderPhoto: (p) =>
+        `<figure class="shot" style="--r:${(p.photo.w / p.photo.h).toFixed(4)}" data-edit="${p.id}" data-edit-kind="shot">` +
+        `<button class="zoom" type="button" data-edit="${p.id}/photo" data-full="${p.large}" aria-label="Vis større">` +
+        `<img src="${p.small}" srcset="${p.small} ${p.photo.w}w, ${p.large} ${p.photo.wl}w" sizes="(max-width: 639px) 100vw, 50vw" ` +
+        `width="${p.photo.w}" height="${p.photo.h}" alt="" loading="lazy" decoding="async"></button>` +
+        `<figcaption><span data-edit="${p.id}/cap" data-edit-kind="text">${esc(p.caption)}</span></figcaption></figure>`,
+    },
+  },
 };
 
-type Role = "view" | "review";
+const TOUCHUP = "https://touchup.jona.no";
 
 const NOINDEX = "noindex, nofollow, noarchive";
 /** `?logg-inn` shows the password form even when signed in, to switch to the other password. */
 const LOGIN = "logg-inn";
-const LAYER = '<script type="module" src="/private/review.js"></script>';
+const SCRIPT = (project: string) =>
+  `<script src="${TOUCHUP}/t.js" data-project="${project}" async></script>`;
+
+/** One per page, so that its cache of the page's edits lasts between requests. */
+const instances = new Map<string, Touchup>();
+function editsFor(env: Env, slug: string, page: PrivatePage) {
+  if (!page.touchup) return undefined;
+  const id = `${slug}\n${env.TOUCHUP_SITE_KEY}`;
+  let edits = instances.get(id);
+  if (!edits) {
+    edits = touchup({
+      api: TOUCHUP,
+      project: slug,
+      key: env.TOUCHUP_SITE_KEY,
+      renderPhoto: page.touchup.renderPhoto,
+    });
+    instances.set(id, edits);
+  }
+  return edits;
+}
 
 export async function privatePage(
   req: Request,
@@ -46,57 +74,39 @@ export async function privatePage(
   const password = env[page.password];
   // An unset secret must not make the empty password (or "undefined") a valid one.
   if (!password) return text(404, "Finnes ikke.");
-  const review = page.review && env[page.review];
-  const tokens: [Role, string][] = [["view", await token(slug, "view", password)]];
-  if (review) tokens.push(["review", await token(slug, "review", review)]);
+  const expected = await token(slug, password);
   const cookie = `private-${slug}`;
-  const held = readCookie(req, cookie);
-  const role = tokens.find(([, t]) => same(held, t))?.[0];
-
-  const api = /^\/_feedback(?:\/(.*))?$/.exec(rest);
-  if (api) {
-    // A note's id is letters, digits, _ and -, so it needs no decoding.
-    const id = api[1];
-    if (role !== "review" || (id !== undefined && !ID.test(id))) return text(404, "Finnes ikke.");
-    return feedback(req, env.PRIVATE, slug, id);
-  }
-  const editing = /^\/_edits(\/.*)?$/.exec(rest);
-  if (editing) {
-    if (role !== "review") return text(404, "Finnes ikke.");
-    return edits(req, env.PRIVATE, slug, editing[1] ?? "");
-  }
+  const signedIn = same(readCookie(req, cookie), expected);
 
   if (req.method === "POST") {
     const tried = (await req.formData()).get("password");
-    let match: string | undefined;
-    if (typeof tried === "string") {
-      for (const [r, t] of tokens) if (same(await token(slug, r, tried), t)) match ??= t;
+    if (typeof tried !== "string" || !same(await token(slug, tried), expected)) {
+      return form(401, true);
     }
-    if (!match) return form(401, true);
     url.searchParams.delete(LOGIN);
     const res = redirect(303, `${url.pathname}${url.search}`);
     res.headers.set(
       "set-cookie",
-      `${cookie}=${match}; Path=/${slug}; Max-Age=31536000; HttpOnly; Secure; SameSite=Lax`,
+      `${cookie}=${expected}; Path=/${slug}; Max-Age=31536000; HttpOnly; Secure; SameSite=Lax`,
     );
     return res;
   }
-  if (!role) return form(401, false);
+  if (!signedIn) return form(401, false);
   if (url.searchParams.has(LOGIN)) return form(200, false);
 
   const key = slug + (rest.endsWith("/") ? `${rest}index.html` : rest);
   if (key.endsWith(".html")) {
-    // A page is put together as it's served: the uploaded file, the edits made since (for
-    // everyone), and the review layer (for the reviewer). So it's never cached, and the reviewer's
-    // copy and a viewer's are never served in each other's place.
-    const [obj, state] = await Promise.all([env.PRIVATE.get(key), liveEdits(env.PRIVATE, slug)]);
+    // A page is put together as it's served: the uploaded file, Touchup's script tag and the edits
+    // made since (for everyone). So it's never cached.
+    const obj = await env.PRIVATE.get(key);
     if (!obj) return text(404, "Finnes ikke.");
     const headers = new Headers({ "x-robots-tag": NOINDEX, "cache-control": "private, no-store" });
     obj.writeHttpMetadata(headers);
-    const res = new Response(role === "review" ? withLayer(await obj.text()) : obj.body, {
-      headers,
-    });
-    return state ? applyEdits(res, state) : res;
+    const edits = editsFor(env, slug, page);
+    if (!edits) return new Response(obj.body, { headers });
+    // The script tag is added here, so the uploaded file stays as the page's maker wrote it.
+    const res = new Response(withScript(await obj.text(), slug), { headers });
+    return edits.apply(req, res);
   }
   const obj = await env.PRIVATE.get(key, { onlyIf: req.headers, range: req.headers });
   if (!obj) return text(404, "Finnes ikke.");
@@ -166,14 +176,15 @@ function readCookie(req: Request, name: string) {
     ?.slice(name.length + 1);
 }
 
-/** The cookie for a role: a hash of its password, never the password itself. */
-function token(slug: string, role: Role, password: string) {
-  return digest(role === "view" ? `${slug}\n${password}` : `${slug}\n${role}\n${password}`);
+/** The cookie for a page: a hash of its password, never the password itself. */
+function token(slug: string, password: string) {
+  return digest(`${slug}\n${password}`);
 }
 
-function withLayer(html: string) {
+function withScript(html: string, project: string) {
+  const tag = SCRIPT(project);
   const at = html.lastIndexOf("</body>");
-  return at < 0 ? html + LAYER : html.slice(0, at) + LAYER + html.slice(at);
+  return at < 0 ? html + tag : html.slice(0, at) + tag + html.slice(at);
 }
 
 async function digest(s: string) {

@@ -24,7 +24,7 @@
   "r2_buckets": [{ "binding": "PRIVATE", "bucket_name": "jona-private" }],
   // Each private page's passwords (worker/private.ts). `wrangler types` takes the names from here.
   "secrets": {
-    "required": ["PILESTREDET_PASSWORD", "PILESTREDET_REVIEW_PASSWORD"],
+    "required": ["PILESTREDET_PASSWORD", "TOUCHUP_SITE_KEY"],
   },
   "observability": { "enabled": true },
 }

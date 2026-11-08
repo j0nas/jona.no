@@ -102,17 +102,15 @@ uploaded with `pnpm exec wrangler r2 object put jona-private/<slug>/<path> --fil
 --content-type <type> --remote`. Changing a page's content is only an upload; changing its
 password is `secret put` again, which signs everyone out.
 
-A page can also have a review password, for someone giving feedback on it: `review` in its
-`PAGES` entry names a second secret. That password opens the same page with a review layer on
-top (`public/private/`), a tab on the right edge with two modes. "Kommenter" leaves a note for
-whoever makes the page, kept in the bucket at `_feedback/<slug>/<id>.json` and read back at
-`/<slug>/_feedback` (`worker/feedback.ts`). "Rediger" edits the page in place: the reviewer taps
-a text to change it, adds or removes paragraphs and list items, and replaces, adds or removes
-photos from their phone. The page marks what can be edited with `data-edit` ids; the edits are a
-log at `_edits/<slug>.json` that the Worker applies to the page for everyone as it's served,
-until they're folded into the page's source (`worker/edits.ts`). The first password still opens
-the page without the layer. Someone already signed in can switch at `/<slug>/?logg-inn`, which
-shows the password form again.
+A page can take part in Touchup (`touchup` in its `PAGES` entry): reviewers comment on it and edit
+it in place, and their edits are applied to the page for every visitor as it's served. The page's
+HTML gets Touchup's script tag (`https://touchup.jona.no/t.js`, with `data-project` set to the slug),
+which does nothing for anyone who isn't a reviewer, and `@touchup/edits` (`worker/touchup/`, a build
+of Touchup's `packages/edits`) fetches the project's edits with the site key (the `TOUCHUP_SITE_KEY`
+secret, made under Agent in Touchup) and rewrites the page's `data-edit` elements. The entry's
+`renderPhoto` is the page's own markup for a photo a reviewer added. A reviewer first signs in with
+the page's password, then opens their invite link once. Someone already signed in can go back to the
+password form at `/<slug>/?logg-inn`.
 
 ## Sharable app links
 

@@ -125,25 +125,19 @@ never goes in this repo — it is public.** The files live in the `jona-private`
 `<slug>/` and are uploaded from wherever the page is made; this repo holds only the `PAGES`
 entry, which names the page's password secret, and that name in `secrets.required`
 (`wrangler.jsonc`). `wrangler deploy` refuses to run while a required secret is unset, so set it
-(`wrangler secret put`) before pushing a new page. A private slug takes `/<slug>` away from the
+(`wrangler secret put`) before pushing a new page, and `TOUCHUP_SITE_KEY` likewise. A private slug takes `/<slug>` away from the
 desktop's own routes, so it must not be an app id.
 
-A page can have a second, review password (`review` in its `PAGES` entry, a secret of its own).
-It opens the same page with a review layer added to the HTML (`public/private/review.js`): a tab
-on the right edge with two modes, the same on a phone and a computer.
-
-- **Kommenter** leaves a note for whoever makes the page. Notes go to `/<slug>/_feedback`
-  (`worker/feedback.ts`), kept in the bucket under `_feedback/<slug>/`, outside the page's folder.
-- **Rediger** changes the page in place: text edited, paragraphs, list items and photos added,
-  removed or replaced. Edits go to `/<slug>/_edits` (`worker/edits.ts`), a log in the bucket at
-  `_edits/<slug>.json`, and are applied to the page for every visitor as it's served (an
-  `HTMLRewriter` keyed on the page's `data-edit` ids) until the page's maker folds them into the
-  page's source and marks them folded. Uploaded photos land in the page's own `img/` folder,
-  re-encoded in the browser (no metadata; the Worker refuses a JPEG with an Exif block).
-
-Only the review password reaches either endpoint. A page's HTML is put together on each request
-(file, edits, layer), so it is served `no-store` with no etag. `applyEdits` needs the Workers
-runtime, so the unit tests stop at the API; check the rewriting under `wrangler dev`.
+A page can be a Touchup project with the slug as its id (`touchup` in its `PAGES` entry). Its HTML
+is put together on each request: the uploaded file, Touchup's script tag
+(`<script src="https://touchup.jona.no/t.js" data-project="<slug>" async>`, for everyone with the
+page's password, since it does nothing for a non-reviewer) and the reviewers' live edits, which
+`@touchup/edits` (`worker/touchup/`, copied from `packages/edits/dist` in the Touchup repo after
+`pnpm --filter @touchup/edits build`) asks Touchup for with the `TOUCHUP_SITE_KEY` secret and applies
+to the page's `data-edit` ids. `renderPhoto` in the entry is the page's own markup for a photo a
+reviewer added. So the page is served `no-store` with no etag. Comments and edits are stored and
+read in Touchup, not here: no endpoint of this Worker takes them. `applyEdits` needs the
+Workers runtime for real, so the unit tests stub Touchup's API; check the rewriting under `wrangler dev`.
 
 ## Sharable links (desktop routing)
 

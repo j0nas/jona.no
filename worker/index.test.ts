@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test, vi } from "vite-plus/test";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test";
 import worker from "./index";
 
 const assets = vi.fn(async (_req: Request) => new Response("desktop"));
@@ -38,10 +38,18 @@ const env = {
   ASSETS: { fetch: assets },
   PRIVATE: bucket,
   PILESTREDET_PASSWORD: "hemmelig",
-  PILESTREDET_REVIEW_PASSWORD: "kommenter",
+  TOUCHUP_SITE_KEY: "tsk_test",
 } as unknown as Env;
+let live: unknown[] = [];
+const touchupApi = vi.fn(async (_url: string, _init?: RequestInit) => Response.json(live));
 const get = (url: string, init?: RequestInit, e = env) =>
   worker.fetch(new Request(url, init) as never, e);
+
+beforeEach(() => {
+  live = [];
+  touchupApi.mockClear();
+  vi.stubGlobal("fetch", touchupApi);
+});
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -49,7 +57,7 @@ afterEach(() => {
   bucket.get.mockClear();
   bucket.put.mockClear();
   for (const key of Object.keys(files)) {
-    if (/^(_feedback\/|_edits\/|pilestredet\/img\/u-)/.test(key)) delete files[key];
+    if (key === "pilestredet/side.html") delete files[key];
   }
 });
 
@@ -164,7 +172,8 @@ describe("private pages", () => {
     const page = await get("https://jona.no/pilestredet/", {
       headers: { cookie: `other=1; ${await cookieFor("hemmelig")}` },
     });
-    expect([page.status, await page.text()]).toEqual([200, "<h1>før og etter</h1>"]);
+    expect(page.status).toBe(200);
+    expect(await page.text()).toContain("<h1>før og etter</h1>");
     expect(page.headers.get("x-robots-tag")).toContain("noindex");
     expect(bucket.get.mock.calls[0][0]).toBe("pilestredet/index.html");
   });
@@ -205,32 +214,74 @@ describe("private pages", () => {
   });
 });
 
-describe("a private page's review password", () => {
+describe("a private page in Touchup", () => {
   const cookieFor = async (password: string, url = "https://jona.no/pilestredet/") => {
     const res = await get(url, { method: "POST", body: new URLSearchParams({ password }) });
     return res.headers.get("set-cookie")!.split(";")[0];
   };
-  const LAYER = "/private/review.js";
+  const SCRIPT =
+    '<script src="https://touchup.jona.no/t.js" data-project="pilestredet" async></script>';
+  // Each test gets its own site key, and so its own Touchup client with nothing cached.
+  let n = 0;
+  const withKey = () => ({ ...env, TOUCHUP_SITE_KEY: `tsk_${++n}` }) as unknown as Env;
+  const edited = (cookie: string, path = "pilestredet/") =>
+    get(`https://jona.no/${path}`, { headers: { cookie } }, withKey());
 
-  test("opens the same page with the comment layer; the old password still opens it without", async () => {
-    const review = await get("https://jona.no/pilestredet/", {
-      headers: { cookie: await cookieFor("kommenter") },
-    });
-    expect(review.status).toBe(200);
-    expect(await review.text()).toBe(
-      `<h1>før og etter</h1><script type="module" src="${LAYER}"></script>`,
-    );
-    // Never cached, and never matched against a viewer's cached copy.
-    expect([review.headers.get("etag"), review.headers.get("cache-control")]).toEqual([
+  test("the page carries Touchup's script tag for everyone who has the password", async () => {
+    const res = await edited(await cookieFor("hemmelig"));
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe(`<h1>før og etter</h1>${SCRIPT}`);
+    // Never cached, since its edits change.
+    expect([res.headers.get("etag"), res.headers.get("cache-control")]).toEqual([
       null,
       "private, no-store",
     ]);
+    // Without the password there is no page, and Touchup isn't asked about it.
+    expect((await get("https://jona.no/pilestredet/")).status).toBe(401);
+  });
 
-    const view = await get("https://jona.no/pilestredet/", {
-      headers: { cookie: await cookieFor("hemmelig") },
+  test("a reviewer's edits are applied for every visitor, asked for with the site key", async () => {
+    files["pilestredet/side.html"] = '<p data-edit="subtitle" data-edit-kind="text">Før</p>';
+    live = [
+      {
+        id: "e1",
+        page: "/pilestredet/side.html",
+        anchor: { editId: "subtitle" },
+        change: { kind: "text", text: "Etter <b>", before: "Før" },
+      },
+    ];
+    const res = await edited(await cookieFor("hemmelig"), "pilestredet/side.html");
+    expect(await res.text()).toBe(
+      `<p data-edit="subtitle" data-edit-kind="text">Etter &lt;b&gt;</p>${SCRIPT}`,
+    );
+    const [url, init] = touchupApi.mock.calls[0];
+    expect(url).toBe("https://touchup.jona.no/api/p/pilestredet/edits?host=jona.no");
+    expect(new Headers(init?.headers).get("authorization")).toMatch(/^Bearer tsk_\d+$/);
+  });
+
+  test("the page still opens when Touchup is down", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    touchupApi.mockRejectedValueOnce(new Error("down"));
+    const res = await edited(await cookieFor("hemmelig"));
+    expect(await res.text()).toBe(`<h1>før og etter</h1>${SCRIPT}`);
+  });
+
+  test("the old layer is gone: no review password, no notes or edits API", async () => {
+    const wrong = await get("https://jona.no/pilestredet/", {
+      method: "POST",
+      body: new URLSearchParams({ password: "kommenter" }),
     });
-    expect(await view.text()).not.toContain(LAYER);
-    expect(await cookieFor("hemmelig")).not.toBe(await cookieFor("kommenter"));
+    expect([wrong.status, wrong.headers.get("set-cookie")]).toEqual([401, null]);
+    const cookie = await cookieFor("hemmelig");
+    for (const path of ["_feedback", "_feedback/n1", "_edits", "_edits/img/u-abc123-s.jpg"]) {
+      const res = await get(`https://jona.no/pilestredet/${path}`, {
+        method: "PUT",
+        body: "x",
+        headers: { cookie },
+      });
+      expect(res.status).toBe(404);
+    }
+    expect(bucket.put).not.toHaveBeenCalled();
   });
 
   test("?logg-inn shows the form to someone signed in, and is dropped after signing in", async () => {
@@ -240,159 +291,8 @@ describe("a private page's review password", () => {
 
     const signedIn = await get("https://jona.no/pilestredet/?logg-inn&x=1", {
       method: "POST",
-      body: new URLSearchParams({ password: "kommenter" }),
+      body: new URLSearchParams({ password: "hemmelig" }),
     });
     expect(signedIn.headers.get("location")).toBe("/pilestredet/?x=1");
-  });
-
-  test("an unset review password opens nothing", async () => {
-    const unset = { ...env, PILESTREDET_REVIEW_PASSWORD: undefined } as unknown as Env;
-    for (const password of ["", "undefined"]) {
-      const res = await get(
-        "https://jona.no/pilestredet/",
-        { method: "POST", body: new URLSearchParams({ password }) },
-        unset,
-      );
-      expect([res.status, res.headers.get("set-cookie")]).toEqual([401, null]);
-    }
-  });
-});
-
-describe("feedback notes", () => {
-  const api = "https://jona.no/pilestredet/_feedback";
-  const as = async (password: string) => {
-    const login = await get("https://jona.no/pilestredet/", {
-      method: "POST",
-      body: new URLSearchParams({ password }),
-    });
-    const cookie = login.headers.get("set-cookie")!.split(";")[0];
-    return (path: string, init: RequestInit = {}) =>
-      get(`${api}${path}`, { ...init, headers: { cookie, ...init.headers } });
-  };
-  const note = { comment: "Feil dato", element: "img", page: "/pilestredet/", source: "tap" };
-  const put = (body: unknown) => ({ method: "PUT", body: JSON.stringify(body) });
-
-  test("are only for the review password", async () => {
-    const viewer = await as("hemmelig");
-    expect((await viewer("")).status).toBe(404);
-    expect((await viewer("/n1", put(note))).status).toBe(404);
-    expect((await get(`${api}/n1`, put(note))).status).toBe(404);
-    expect(bucket.put).not.toHaveBeenCalled();
-  });
-
-  test("are kept outside the page's folder, edited in place and marked done", async () => {
-    const reviewer = await as("kommenter");
-    expect((await reviewer("/n1", put(note))).status).toBe(200);
-    expect(Object.keys(files)).toContain("_feedback/pilestredet/n1.json");
-
-    await reviewer("/n1", put({ ...note, comment: "Feil dato, skal være 2." }));
-    expect((await reviewer("/n1", { method: "PATCH", body: '{"status":"resolved"}' })).status).toBe(
-      200,
-    );
-    const [saved] = await (await reviewer("")).json<{ comment: string; status: string }[]>();
-    expect([saved.comment, saved.status]).toEqual(["Feil dato, skal være 2.", "resolved"]);
-
-    // Taking a note back only works while it's open.
-    await reviewer("/n1", { method: "DELETE" });
-    expect(await (await reviewer("")).json()).toHaveLength(1);
-    await reviewer("/n2", put(note));
-    await reviewer("/n2", { method: "DELETE" });
-    expect(await (await reviewer("")).json()).toHaveLength(1);
-  });
-
-  test("turn down empty notes, bad ids and bad statuses", async () => {
-    const reviewer = await as("kommenter");
-    expect((await reviewer("/n1", put({ ...note, comment: " " }))).status).toBe(400);
-    expect((await reviewer("/n1", put("x"))).status).toBe(400);
-    expect((await reviewer("/a.b", put(note))).status).toBe(404);
-    expect((await reviewer("/%E0%A4%A", put(note))).status).toBe(404);
-    await reviewer("/n1", put(note));
-    expect((await reviewer("/n1", { method: "PATCH", body: '{"status":"x"}' })).status).toBe(400);
-  });
-});
-
-describe("edits", () => {
-  const api = "https://jona.no/pilestredet/_edits";
-  const as = async (password: string) => {
-    const login = await get("https://jona.no/pilestredet/", {
-      method: "POST",
-      body: new URLSearchParams({ password }),
-    });
-    const cookie = login.headers.get("set-cookie")!.split(";")[0];
-    return (path: string, init: RequestInit = {}) =>
-      get(`${api}${path}`, { ...init, headers: { cookie, ...init.headers } });
-  };
-  const post = (body: unknown) => ({ method: "POST", body: JSON.stringify(body) });
-  const photo = { name: "u-abc123", w: 900, h: 600, wl: 2000 };
-  const jpeg = (...bytes: number[]) =>
-    new Uint8Array([0xff, 0xd8, 0xff, 0xe0, ...bytes, 0xff, 0xd9]);
-
-  test("are only for the review password", async () => {
-    const viewer = await as("hemmelig");
-    expect((await viewer("")).status).toBe(404);
-    expect((await viewer("", post({ kind: "remove", target: "small/1" }))).status).toBe(404);
-    expect((await viewer("/img/u-abc123-s.jpg", { method: "PUT", body: jpeg() })).status).toBe(404);
-  });
-
-  test("are logged in order, and can be taken back", async () => {
-    const editor = await as("kommenter");
-    const res = await editor(
-      "",
-      post({ kind: "text", target: "title", text: " Pilestredet\n63 C ", before: "x" }),
-    );
-    const { edit } = await res.json<{ edit: { id: string; text: string; status: string } }>();
-    expect([edit.text, edit.status]).toEqual(["Pilestredet 63 C", "live"]);
-    await editor("", post({ kind: "remove", target: "small/1" }));
-
-    expect(
-      (await editor(`/${edit.id}`, { method: "PATCH", body: '{"status":"undone"}' })).status,
-    ).toBe(200);
-    const log = await (await editor("")).json<{ kind: string; status: string }[]>();
-    expect(log.map((e) => [e.kind, e.status])).toEqual([
-      ["text", "undone"],
-      ["remove", "live"],
-    ]);
-  });
-
-  test("answer with the HTML they add, its text escaped", async () => {
-    const editor = await as("kommenter");
-    const p = await editor(
-      "",
-      post({ kind: "insert", after: "job/vinduene/p0", block: { type: "p", text: "<b>&" } }),
-    );
-    const { edit, html } = await p.json<{ edit: { id: string }; html: string }>();
-    expect(html).toBe(`<p data-edit="new/${edit.id}" data-edit-kind="p">&#60;b&#62;&#38;</p>`);
-
-    const swap = await editor("", post({ kind: "photo", target: "hero/0", photo, media: "img" }));
-    expect((await swap.json<{ html: string }>()).html).toMatch(
-      /^<img data-edit="hero\/0\/photo" src="img\/u-abc123-s.jpg" srcset="img\/u-abc123-s.jpg 900w, img\/u-abc123-l.jpg 2000w"/,
-    );
-  });
-
-  test("turn down what isn't an edit", async () => {
-    const editor = await as("kommenter");
-    for (const body of [
-      { kind: "text", target: "../x", text: "a" },
-      { kind: "photo", target: "hero/0", photo: { ...photo, name: "../evil" } },
-      { kind: "insert", after: "small/1", block: { type: "p", text: " " } },
-      { kind: "insert", after: "small/1", block: { type: "script", text: "a" } },
-      { kind: "nope" },
-    ]) {
-      expect((await editor("", post(body))).status).toBe(400);
-    }
-    expect((await editor("/x", { method: "PATCH", body: '{"status":"live"}' })).status).toBe(404);
-  });
-
-  test("take photos as metadata-free JPEGs, into the page's folder", async () => {
-    const editor = await as("kommenter");
-    const put = (name: string, body: Uint8Array) => editor(`/img/${name}`, { method: "PUT", body });
-    expect((await put("u-abc123-s.jpg", jpeg(1, 2, 3))).status).toBe(200);
-    expect(files["pilestredet/img/u-abc123-s.jpg"]).toBeDefined();
-    // "Exif\0\0": a photo straight off a phone, with where it was taken.
-    expect((await put("u-abc123-l.jpg", jpeg(0x45, 0x78, 0x69, 0x66, 0, 0))).status).toBe(400);
-    expect((await put("u-abc123-l.jpg", new Uint8Array([0x89, 0x50, 0x4e, 0x47]))).status).toBe(
-      400,
-    );
-    expect((await put("index.html", jpeg())).status).toBe(400);
   });
 });
