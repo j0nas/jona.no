@@ -4,6 +4,7 @@ import {
   Document,
   ExternalHyperlink,
   Footer,
+  ImageRun,
   LevelFormat,
   LineRuleType,
   Packer,
@@ -15,9 +16,9 @@ import {
   type ParagraphChild,
 } from "docx";
 import { estimatePageNumbers } from "docx/layout";
-import { GAP, type Resume } from "../resumeData";
+import { GAP, LOCALE, type Resume } from "../resumeData";
 import { EASTER_EGG } from "./easterEgg";
-import { buildModel, type Inline, type Item } from "./model";
+import { buildModel, type Inline, type Item, type ModelOptions } from "./model";
 
 // The DOCX: an ordinary Word document with real styles (Title, Heading 1 to 3, List Bullet), Times
 // New Roman under Arial headings, and dates on a right tab stop rather than in a table, so a
@@ -66,6 +67,21 @@ function paragraph(item: Item, before: number, keepNext: boolean): Paragraph {
     spacing: { before: pt(before), after: pt(after) },
   };
   switch (item.kind) {
+    case "logos":
+      return new Paragraph({
+        ...options,
+        children: item.logos.flatMap(({ data, format, width, height }, i) => [
+          ...(i ? [new TextRun("  ")] : []),
+          // Pixels at 96 to the inch, from points.
+          new ImageRun({
+            type: format,
+            data,
+            transformation: { width: (width * 4) / 3, height: (height * 4) / 3 },
+          }),
+        ]),
+      });
+    case "contact":
+      return new Paragraph({ ...options, style: "ClosingContact", children: runs(item.runs) });
     case "employer":
       return new Paragraph({
         ...options,
@@ -119,12 +135,29 @@ function paragraph(item: Item, before: number, keepNext: boolean): Paragraph {
   }
 }
 
-export async function buildDocx(resume: Resume): Promise<Buffer> {
-  const model = buildModel(resume);
+export async function buildDocx(resume: Resume, options: ModelOptions = {}): Promise<Buffer> {
+  const model = buildModel(resume, options);
   const children: Paragraph[] = [];
 
-  if (model.name) {
-    children.push(new Paragraph({ style: "Title", children: [new TextRun(model.name)] }));
+  if (model.name || model.born) {
+    const born = model.born
+      ? [
+          new TextRun({
+            text: `\t${model.born}`,
+            font: SERIF,
+            size: 22,
+            bold: false,
+            characterSpacing: 0,
+          }),
+        ]
+      : [];
+    children.push(
+      new Paragraph({
+        style: "Title",
+        tabStops: [{ type: TabStopType.LEFT, position: pt(220) }],
+        children: [new TextRun(model.name ?? ""), ...born],
+      }),
+    );
   }
   if (model.label) {
     children.push(new Paragraph({ style: "Subtitle", children: [new TextRun(model.label)] }));
@@ -135,6 +168,14 @@ export async function buildDocx(resume: Resume): Promise<Buffer> {
     contact.push(...runs([item]));
   });
   children.push(new Paragraph({ style: "Contact", children: contact }));
+  model.summary.forEach((paragraph, i) => {
+    children.push(
+      new Paragraph({
+        spacing: { before: pt(i ? GAP.bullet : GAP.summary) },
+        children: runs(paragraph),
+      }),
+    );
+  });
 
   // The last two blocks stay together, so the last page can't be one short section by itself.
   const lastButOne = model.sections.flatMap((section) => section.blocks).at(-2);
@@ -168,7 +209,7 @@ export async function buildDocx(resume: Resume): Promise<Buffer> {
     styles: {
       default: {
         document: {
-          run: { font: SERIF, size: 22 },
+          run: { font: SERIF, size: 22, language: { value: LOCALE[options.lang ?? "en"] } },
           paragraph: { spacing: { before: 0, after: 0, line: 270 } },
         },
         hyperlink: { run: { color: "000080", underline: {} } },
@@ -201,6 +242,13 @@ export async function buildDocx(resume: Resume): Promise<Buffer> {
             spacing: { before: 0, after: 0 },
             border: { top: { style: BorderStyle.SINGLE, size: 12, space: 7, color: "000000" } },
           },
+        },
+        {
+          id: "ClosingContact",
+          name: "Closing Contact",
+          basedOn: "Normal",
+          run: { font: SANS, size: 18 },
+          paragraph: { spacing: { before: 0, after: 0, line: 360 } },
         },
         {
           id: "Heading1",

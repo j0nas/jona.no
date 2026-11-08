@@ -2,6 +2,7 @@ import { createElement as h, type ReactNode } from "react";
 import {
   Document,
   Font,
+  Image,
   Link,
   Page,
   renderToBuffer,
@@ -10,9 +11,9 @@ import {
   View,
   type Styles,
 } from "@react-pdf/renderer";
-import { GAP, type Resume } from "../resumeData";
+import { GAP, LOCALE, type Resume } from "../resumeData";
 import { EASTER_EGG } from "./easterEgg";
-import { buildModel, type Block, type Inline, type Item } from "./model";
+import { buildModel, type Block, type Inline, type Item, type ModelOptions } from "./model";
 
 // The PDF, in the manner of Resume.module.css: A4, 1" margins left and right and 0.8" top and bottom,
 // Times under Arial headings (the built-in Times-Roman and Helvetica, so nothing is embedded). The
@@ -46,8 +47,13 @@ const s = StyleSheet.create({
     lineHeight: 1,
     textAlign: "right",
   },
+  nameLine: { flexDirection: "row", alignItems: "flex-end" },
   name: { fontFamily: `${SANS}-Bold`, fontSize: 24, letterSpacing: 0.5, lineHeight: 1.1 },
+  // On the name's baseline, by eye.
+  born: { marginLeft: 36, marginBottom: 2.5 },
   label: { marginTop: 4, marginBottom: 10, fontFamily: "Times-Italic", fontSize: 13 },
+  logos: { flexDirection: "row", alignItems: "flex-end" },
+  closingContact: { fontFamily: SANS, fontSize: 9, lineHeight: 1.5 },
   contact: {
     borderTopWidth: 1.5,
     borderTopColor: "#000000",
@@ -120,6 +126,20 @@ function heading(item: { text: string; href?: string }, style: Styles[string]): 
 function renderItem(item: Item, i: number): ReactNode {
   const marginTop = item.before ?? 0;
   switch (item.kind) {
+    case "logos":
+      return h(
+        View,
+        { key: i, style: [s.logos, { marginTop }] },
+        ...item.logos.map(({ data, format, width, height }, j) =>
+          h(Image, {
+            key: j,
+            src: { data: Buffer.from(data), format },
+            style: { width, height, marginLeft: j ? 6 : 0 },
+          }),
+        ),
+      );
+    case "contact":
+      return h(Text, { key: i, style: [s.closingContact, { marginTop }] }, runs(item.runs));
     case "employer":
       return row(i, heading(item, s.employer), item.right, 2.7, { marginTop });
     case "role":
@@ -166,8 +186,8 @@ function block(key: string, { items }: Block, head?: ReactNode): ReactNode {
   return h(View, { key, wrap: false }, head, ...items.map(renderItem));
 }
 
-export async function buildPdf(resume: Resume): Promise<Buffer> {
-  const model = buildModel(resume);
+export async function buildPdf(resume: Resume, options: ModelOptions = {}): Promise<Buffer> {
+  const model = buildModel(resume, options);
   const contact: ReactNode[] = [];
   model.contact.forEach((item, i) => {
     if (i) contact.push(h(Text, { key: `d${i}` }, "  ·  "));
@@ -192,13 +212,26 @@ export async function buildPdf(resume: Resume): Promise<Buffer> {
       author: model.name ?? "Jonas Jensen",
       creator: model.name ?? "Jonas Jensen",
       producer: model.name ?? "Jonas Jensen",
+      language: LOCALE[options.lang ?? "en"],
     },
     h(
       Page,
       { size: "A4", style: s.page },
-      model.name ? h(Text, { style: s.name }, model.name) : null,
+      h(
+        View,
+        { style: s.nameLine },
+        model.name ? h(Text, { style: s.name }, model.name) : null,
+        model.born ? h(Text, { style: s.born }, model.born) : null,
+      ),
       model.label ? h(Text, { style: s.label }, model.label) : null,
       h(Text, { style: s.contact }, ...contact),
+      ...model.summary.map((paragraph, i) =>
+        h(
+          Text,
+          { key: `summary-${i}`, style: { marginTop: i ? GAP.bullet : GAP.summary } },
+          runs(paragraph),
+        ),
+      ),
       ...body,
       // The last two blocks stay together, so the last page can't be one short section by itself.
       h(View, { wrap: false }, ...tail),

@@ -8,7 +8,7 @@ import MyComputer from "../../apps/my-computer/MyComputer";
 import RecycleBin from "../../apps/recycle-bin/RecycleBin";
 import Notepad from "../../apps/notepad/Notepad";
 import Personal from "../../apps/personal/Personal";
-import Documents, { CV_FILE_NAME } from "../../apps/documents/Documents";
+import Documents from "../../apps/documents/Documents";
 import Domains from "../../apps/domains/Domains";
 import DocViewer from "../../apps/documents/DocViewer";
 import EmbeddedApp from "../../apps/embedded/EmbeddedApp";
@@ -25,6 +25,7 @@ import {
   type WindowId,
 } from "../../apps/registry";
 import { docs } from "../../docs";
+import { CV_DOCS } from "../../apps/word/downloads/files";
 import styles from "./Desktop.module.css";
 
 // The CV window (Word's chrome and the résumé's data) loads when it's first opened.
@@ -36,7 +37,8 @@ const DESKTOP_ICONS: { id: string; appId: AppId; label: string }[] = [
   { id: "my-computer", appId: "my-computer", label: "My Computer" },
   { id: "recycle-bin", appId: "recycle-bin", label: "Recycle Bin" },
   { id: "internet", appId: "internet", label: "The Internet" },
-  { id: "cv", appId: "cv", label: CV_FILE_NAME },
+  { id: "cv", appId: "cv", label: CV_DOCS.en },
+  { id: "cv/no", appId: "cv/no", label: CV_DOCS.no },
   { id: "wordpad", appId: "wordpad", label: "Document.rtf" },
   { id: "personal-details", appId: "personal-details", label: "personal-details.txt" },
   { id: "personal", appId: "personal", label: "Personal" },
@@ -69,9 +71,14 @@ interface WinState {
 type Renderer = (controls: WindowControls, open: (id: WindowId) => void) => ReactElement;
 const renderers: Partial<Record<AppId, Renderer>> = {
   internet: (controls, open) => <InternetExplorer controls={controls} onOpen={open} />,
-  cv: (controls) => (
+  cv: (controls, open) => (
     <Suspense fallback={null}>
-      <WordCV controls={controls} />
+      <WordCV controls={controls} lang="en" onOpen={open} />
+    </Suspense>
+  ),
+  "cv/no": (controls, open) => (
+    <Suspense fallback={null}>
+      <WordCV controls={controls} lang="no" onOpen={open} />
     </Suspense>
   ),
   "personal-details": (controls) => <Notepad controls={controls} content={NOTEPAD_CONTENT} />,
@@ -254,7 +261,12 @@ export default function Desktop() {
         label: "&Documents",
         icon: "/img/win95/documents-32.png",
         submenu: [
-          { label: CV_FILE_NAME, icon: "/img/cv/worddoc-16.png", onClick: () => openApp("cv") },
+          { label: CV_DOCS.en, icon: "/img/cv/worddoc-16.png", onClick: () => openApp("cv") },
+          {
+            label: CV_DOCS.no,
+            icon: "/img/cv/worddoc-16.png",
+            onClick: () => openApp("cv/no"),
+          },
           {
             label: "personal-details.txt",
             icon: apps["personal-details"].iconSmall,

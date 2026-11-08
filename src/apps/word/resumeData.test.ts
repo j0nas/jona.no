@@ -3,14 +3,15 @@ import {
   dateRange,
   displayUrl,
   footerLabel,
+  formatBirthDate,
   formatDate,
   formatLocation,
   groupByEmployer,
-  highlightGroups,
   languageList,
   paginate,
   projectRight,
   schoolStudy,
+  textGroups,
 } from "./resumeData";
 
 describe("resume dates", () => {
@@ -27,6 +28,14 @@ describe("resume dates", () => {
     expect(dateRange(undefined, "2016")).toBe("2016");
     expect(dateRange()).toBe("");
   });
+
+  test("are in the CV's language", () => {
+    expect(formatDate("2022-12", "no")).toBe("Des 2022");
+    expect(dateRange("2022-08", undefined, true, "no")).toBe("Aug 2022 – nå");
+    expect(dateRange("2019-05", "2022-10", true, "no")).toBe("Mai 2019 – Okt 2022");
+    expect(formatBirthDate("1992-12-24", "no")).toBe("f. 24.12.1992");
+    expect(formatBirthDate("1992-03-04")).toBe("b. 4 Mar 1992");
+  });
 });
 
 describe("resume text", () => {
@@ -39,6 +48,7 @@ describe("resume text", () => {
     expect(formatLocation({ city: "Oslo", region: "Oslo", countryCode: "NO" })).toBe(
       "Oslo, Norway",
     );
+    expect(formatLocation({ city: "Oslo", countryCode: "NO" }, "no")).toBe("Oslo, Norge");
     expect(formatLocation({ city: "Oslo" })).toBe("Oslo");
     expect(formatLocation()).toBe("");
   });
@@ -102,23 +112,16 @@ describe("groupByEmployer", () => {
   });
 });
 
-describe("highlightGroups", () => {
-  const groups = (highlights: string[], summaries: string[] = []) =>
-    highlightGroups({ summaries, highlights });
-
-  test("keeps the last two together, and the first with a heading that has nothing else", () => {
-    expect(groups(["a", "b", "c", "d"])).toEqual({ head: ["a"], rest: [["b"], ["c", "d"]] });
-    expect(groups(["a", "b"])).toEqual({ head: ["a", "b"], rest: [] });
-    expect(groups([])).toEqual({ head: [], rest: [] });
+describe("textGroups", () => {
+  test("keeps the last two together, and the first with the heading", () => {
+    expect(textGroups(["a", "b", "c", "d"])).toEqual({ head: ["a"], rest: [["b"], ["c", "d"]] });
+    expect(textGroups(["s", "a", "b"])).toEqual({ head: ["s"], rest: [["a", "b"]] });
+    expect(textGroups([])).toEqual({ head: [], rest: [] });
   });
 
-  test("lets a summary keep the heading company", () => {
-    expect(groups(["a", "b", "c"], ["s"])).toEqual({ head: [], rest: [["a"], ["b", "c"]] });
-    expect(groups(["a", "b"], ["s"])).toEqual({ head: [], rest: [["a", "b"]] });
-  });
-
-  test("never leaves a lone highlight to start a page", () => {
-    expect(groups(["a"], ["s"])).toEqual({ head: ["a"], rest: [] });
+  test("never leaves a lone piece to start a page", () => {
+    expect(textGroups(["s", "a"])).toEqual({ head: ["s", "a"], rest: [] });
+    expect(textGroups(["a"])).toEqual({ head: ["a"], rest: [] });
   });
 });
 

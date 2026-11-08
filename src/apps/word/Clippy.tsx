@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { initAgent } from "clippyjs";
-import { CV_DOCX, CV_JSON, CV_PDF } from "./downloads/files";
-import { resume } from "./resumeData";
+import { cvDownload } from "./downloads/files";
+import { resumes, type Lang } from "./resumeData";
 import styles from "./Clippy.module.css";
 
 type Agent = Awaited<ReturnType<typeof initAgent>>;
@@ -12,10 +12,12 @@ const ARRIVAL_MS = 1200;
 const BULLET = "/img/cv/clippy-bullet.png";
 const COPY_LABEL = "Copy the address";
 const DOWNLOADS = [
-  { href: CV_PDF, label: "PDF" },
-  { href: CV_DOCX, label: "Word document" },
-  { href: CV_JSON, label: "JSON" },
-];
+  { type: "pdf", label: "PDF" },
+  { type: "docx", label: "Word document" },
+  { type: "json", label: "JSON" },
+] as const;
+/** The way to the CV in the other language, said in that language. */
+const OTHER_LANGUAGE: Record<Lang, string> = { en: "Les CV-en på norsk", no: "Read it in English" };
 
 // His window closed stays closed, until Help or the toolbar brings him back.
 export function setAssistantClosed(closed: boolean): void {
@@ -49,6 +51,8 @@ async function loadAgent(): Promise<Agent> {
 }
 
 interface ClippyProps {
+  /** The CV's language: the downloads are in it, and he offers the other. */
+  lang: Lang;
   /** Whether he'd fit without covering text. While false he's hidden, and not loaded if he hasn't been yet. */
   fits: boolean;
   /** Whether his balloon would fit without covering text. While false it doesn't open on arrival; clicking him still opens it. */
@@ -57,6 +61,7 @@ interface ClippyProps {
   /** Bumped when Help or the toolbar's Assistant button calls for him. */
   summons: number;
   onPrint: () => void;
+  onOtherLanguage: () => void;
   onClose: () => void;
 }
 
@@ -67,11 +72,13 @@ interface ClippyProps {
  * into our stage and the stylesheet pins it there.
  */
 export default function Clippy({
+  lang,
   fits,
   balloonFits,
   minimized,
   summons,
   onPrint,
+  onOtherLanguage,
   onClose,
 }: ClippyProps) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -79,7 +86,7 @@ export default function Clippy({
   const [balloon, setBalloon] = useState(false);
   const [view, setView] = useState<"main" | "hiring" | "download">("main");
   const [copyLabel, setCopyLabel] = useState(COPY_LABEL);
-  const email = resume.basics?.email;
+  const email = resumes[lang].basics?.email;
 
   // Load once there's room for him, a beat after the window opens.
   useEffect(() => {
@@ -195,8 +202,8 @@ export default function Clippy({
       {balloon && view === "download" && (
         <div className={styles.balloon} role="dialog" aria-label="Office Assistant">
           <p className={styles.title}>Which format would you like?</p>
-          {DOWNLOADS.map(({ href, label }) => (
-            <a key={href} className={styles.option} href={href} download>
+          {DOWNLOADS.map(({ type, label }) => (
+            <a key={type} className={styles.option} href={cvDownload(lang, type)} download>
               <img src={BULLET} alt="" width={15} height={15} />
               <span>{label}</span>
             </a>
@@ -233,6 +240,17 @@ export default function Clippy({
           >
             <img src={BULLET} alt="" width={15} height={15} />
             <span>Print this résumé</span>
+          </button>
+          <button
+            type="button"
+            className={styles.option}
+            onClick={() => {
+              setBalloon(false);
+              onOtherLanguage();
+            }}
+          >
+            <img src={BULLET} alt="" width={15} height={15} />
+            <span>{OTHER_LANGUAGE[lang]}</span>
           </button>
           <hr className={styles.rule} />
           <button type="button" className={styles.pill} onClick={dismiss}>

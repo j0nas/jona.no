@@ -1,5 +1,6 @@
 import type { Menu } from "../../win95";
-import { CV_DOCX, CV_FILE } from "./downloads/files";
+import { CV_DOCS, CV_FILES, cvDownload, otherLang } from "./downloads/files";
+import type { Lang } from "./resumeData";
 
 /**
  * Word 97's menu bar. The document is read-only and there's only so much for it to do, so these
@@ -7,21 +8,26 @@ import { CV_DOCX, CV_FILE } from "./downloads/files";
  * resource dump (SOURCES.md §Word 97).
  */
 export function wordMenus({
+  lang,
   online,
   onPrint,
   onClose,
   onHelp,
+  onOpenOther,
 }: {
+  lang: Lang;
   online: boolean;
   onPrint: () => void;
   onClose: () => void;
   onHelp: () => void;
+  /** Opens the CV in the other language, the other file on File's list of recent ones. */
+  onOpenOther: () => void;
 }): Menu[] {
   // Saving from Word gives a Word document.
   const saveAs = () => {
     const link = document.createElement("a");
-    link.href = CV_DOCX;
-    link.download = `${CV_FILE}.docx`;
+    link.href = cvDownload(lang, "docx");
+    link.download = `${CV_FILES[lang]}.docx`;
     link.click();
   };
   return [
@@ -44,7 +50,8 @@ export function wordMenus({
         { label: "Sen&d To", disabled: true },
         { label: "Propert&ies", disabled: true },
         "divider",
-        { label: "&1 Jonas Jensen CV.doc", disabled: true },
+        { label: `&1 ${CV_DOCS[lang]}`, disabled: true },
+        { label: `&2 ${CV_DOCS[otherLang(lang)]}`, onClick: onOpenOther },
         "divider",
         { label: "E&xit", onClick: onClose },
       ],
@@ -193,7 +200,7 @@ export function wordMenus({
         { label: "&Arrange All", disabled: true },
         { label: "&Split", disabled: true },
         "divider",
-        { label: "&1 Jonas Jensen CV.doc", checked: true },
+        { label: `&1 ${CV_DOCS[lang]}`, checked: true },
       ],
     },
     {

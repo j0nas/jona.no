@@ -83,8 +83,9 @@ The markdown is compiled at build time with `marked`, so the site stays a static
 
 ## The CV
 
-The CV at [`/cv`](https://jona.no/cv) is `content/cv/resume.json` (JSON Resume), rendered at build
-time in a Word 97 window on A4 sheets (`src/apps/word/`). File › Print, the toolbar's Print button
+The CV at [`/cv`](https://jona.no/cv) is `content/cv/resume.en.json` (JSON Resume), and in Norwegian
+at [`/cv/no`](https://jona.no/cv/no) `content/cv/resume.no.json`, rendered at build time in a Word 97
+window on A4 sheets (`src/apps/word/`), with the employers' logos from `public/img/cv/logos/`. File › Print, the toolbar's Print button
 and Ctrl+P print just those sheets, so saving a PDF is the way to get a copy of it.
 
 ## Private pages
@@ -138,16 +139,16 @@ Touchup is the review layer: select some text on the CV, or tap anything, commen
 agent picks that up over MCP, fixes the source and replies on the page. Its source is a private repo
 next to this one. `index.html` loads its `t.js`, about 1.5 kB that does nothing for a visitor; the
 widget loads only in a browser that opened a reviewer's invite link. The project is `jona-no` on
-touchup.jona.no, comments only since the CV's text comes from `content/cv/resume.json`, with the
+touchup.jona.no, comments only since the CV's text comes from `content/cv/resume.*.json`, with the
 origins `https://jona.no`, `http://localhost:5173` and `http://jonass-mbp:5173`. The last is for
 another device on the network, and needs `vp dev --host`.
 
 `@touchup/vite` stamps elements with where they're written, which for the CV is `Resume.tsx`. It also
-tags what `resume.json` holds, so an element of the CV that shows one value whole names it
-(`data-touchup-field="git:content/cv/resume.json#/basics/summary"`), and `index.html` names the branch
+tags what the résumé files hold, so an element of the CV that shows one value whole names it
+(`data-touchup-field="git:content/cv/resume.en.json#/basics/summary"`), and `index.html` names the branch
 and commit it was built from (`<meta name="touchup-revision">`); a note on that element says which
 value it's about. For the rest, such as dates and text with a link in it, the words of a note are what
-find it in `resume.json`. The agent's key is in the gitignored `.env`:
+find it in the résumé file. The agent's key is in the gitignored `.env`:
 `node ../touchup/packages/cli/touchup.ts` lists the open notes, and Touchup's README has the routine
 and the line that adds its MCP server. The site sends no Content-Security-Policy to the desktop, so
 nothing needs adding there.

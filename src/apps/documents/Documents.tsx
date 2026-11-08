@@ -2,15 +2,14 @@ import type { WindowControls } from "../../components/window/AppWindow";
 import FolderWindow from "../folder/FolderWindow";
 import { apps, type WindowId } from "../registry";
 import { docs } from "../../docs";
-
-export const CV_FILE_NAME = "Jonas Jensen CV.doc";
+import { CV_DOCS } from "../word/downloads/files";
 
 interface DocumentsProps {
   controls: WindowControls;
   onOpen: (id: WindowId) => void;
 }
 
-// A folder window listing the CV and every document in content/docs/ as a WordPad
+// A folder window listing the CV in each language and every document in content/docs/ as a WordPad
 // file. Double-click (or Enter) opens it in its own read-only window.
 export default function Documents({ controls, onOpen }: DocumentsProps) {
   return (
@@ -18,7 +17,13 @@ export default function Documents({ controls, onOpen }: DocumentsProps) {
       id="documents"
       controls={controls}
       items={[
-        { key: "cv", icon: apps.cv.icon, label: CV_FILE_NAME, onOpen: () => onOpen("cv") },
+        { key: "cv", icon: apps.cv.icon, label: CV_DOCS.en, onOpen: () => onOpen("cv") },
+        {
+          key: "cv/no",
+          icon: apps["cv/no"].icon,
+          label: CV_DOCS.no,
+          onOpen: () => onOpen("cv/no"),
+        },
         ...docs.map((doc) => ({
           key: doc.slug,
           icon: apps.wordpad.icon,

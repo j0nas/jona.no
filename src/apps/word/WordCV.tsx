@@ -1,11 +1,22 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AppWindow, { type WindowControls } from "../../components/window/AppWindow";
+import type { WindowId } from "../registry";
 import { MenuBar, StatusBar } from "../../win95";
 import Clippy, { assistantClosed, setAssistantClosed } from "./Clippy";
 import { EASTER_EGG } from "./downloads/easterEgg";
+import { CV_WINDOWS, otherLang } from "./downloads/files";
 import { Measure, OnlineLayout, Sheets, resumeBlocks } from "./Resume";
-import { PAGE_H, PAGE_MARGIN, PAGE_MARGIN_Y, PAGE_W, paginate, resume } from "./resumeData";
+import {
+  LOCALE,
+  PAGE_H,
+  PAGE_MARGIN,
+  PAGE_MARGIN_Y,
+  PAGE_W,
+  paginate,
+  resumes,
+  type Lang,
+} from "./resumeData";
 import Ruler from "./Ruler";
 import { StandardToolbar, FormattingToolbar, Grip } from "./Toolbars";
 import { wordMenus } from "./wordMenus";
@@ -29,23 +40,29 @@ const BALLOON_W = 210;
 
 interface WordCVProps {
   controls: WindowControls;
+  /** Which of the CV's files this window has open, its window being that language's. */
+  lang: Lang;
+  onOpen: (id: WindowId) => void;
 }
 
-function print() {
+function print(name = "CV") {
   const title = document.title;
-  document.title = `${resume.basics?.name ?? "CV"} CV`; // the name a PDF is saved under
+  document.title = `${name} CV`; // the name a PDF is saved under
   window.print();
   document.title = title;
 }
 
 /**
- * Word 97 in page layout view, with the CV (content/cv/resume.json) as a read-only document:
+ * Word 97 in page layout view, with the CV (content/cv/resume.<lang>.json) as a read-only document:
  * A4 sheets on the grey workspace, scaled down to fit a narrow window, or in online layout view when
  * that would be too small to read. What prints is always the sheets, without the rest of the desktop
  * (print.css). SOURCES.md §Word 97 has the chrome's provenance.
  */
-export default function WordCV({ controls }: WordCVProps) {
-  const blocks = useMemo(() => resumeBlocks(resume), []);
+export default function WordCV({ controls, lang, onOpen }: WordCVProps) {
+  const resume = resumes[lang];
+  const blocks = useMemo(() => resumeBlocks(resumes[lang], lang), [lang]);
+  const onPrint = () => print(resume.basics?.name);
+  const openOther = () => onOpen(CV_WINDOWS[otherLang(lang)]);
   const [pages, setPages] = useState<number[][] | null>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -90,12 +107,12 @@ export default function WordCV({ controls }: WordCVProps) {
     function onKey(event: KeyboardEvent) {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "p") {
         event.preventDefault();
-        print();
+        print(resume.basics?.name);
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [controls.active]);
+  }, [controls.active, resume]);
 
   const onScroll = () => {
     const workspace = workspaceRef.current;
@@ -114,14 +131,16 @@ export default function WordCV({ controls }: WordCVProps) {
   }
 
   const menus = wordMenus({
+    lang,
     online,
-    onPrint: print,
+    onPrint,
     onClose: controls.onClose,
     onHelp: showAssistant,
+    onOpenOther: openOther,
   });
 
   return (
-    <AppWindow id="cv" controls={controls}>
+    <AppWindow id={CV_WINDOWS[lang]} controls={controls}>
       <div className={styles.word}>
         <div className={styles.menuBar}>
           <Grip />
@@ -134,7 +153,7 @@ export default function WordCV({ controls }: WordCVProps) {
           />
           <MenuBar menus={menus} flat />
         </div>
-        {!online && <StandardToolbar zoom={zoom} onPrint={print} onAssistant={showAssistant} />}
+        {!online && <StandardToolbar zoom={zoom} onPrint={onPrint} onAssistant={showAssistant} />}
         {!online && <FormattingToolbar />}
         <div className={styles.document}>
           {!online && <Ruler pageLeft={pageLeft} zoom={zoom} />}
@@ -142,6 +161,7 @@ export default function WordCV({ controls }: WordCVProps) {
             <div
               ref={workspaceRef}
               className={`${styles.workspace}${online ? ` ${styles.workspaceOnline}` : ""}`}
+              lang={LOCALE[lang]}
               onScroll={onScroll}
             >
               {online && <OnlineLayout blocks={blocks} />}
@@ -162,11 +182,13 @@ export default function WordCV({ controls }: WordCVProps) {
             )}
             {assistantOn && (
               <Clippy
+                lang={lang}
                 fits={assistantFits}
                 balloonFits={balloonFits}
                 minimized={controls.minimized}
                 summons={summons}
-                onPrint={print}
+                onPrint={onPrint}
+                onOtherLanguage={openOther}
                 onClose={() => setAssistantOn(false)}
               />
             )}
@@ -225,7 +247,7 @@ export default function WordCV({ controls }: WordCVProps) {
             <StatusBar.Field style={{ flex: "0 0 35px" }} />
           </div>
         </StatusBar>
-        {!pages && <Measure blocks={blocks} measureRef={measureRef} />}
+        {!pages && <Measure blocks={blocks} measureRef={measureRef} lang={LOCALE[lang]} />}
         <p className={styles.llmNote} aria-hidden="true">
           {EASTER_EGG}
         </p>
@@ -233,7 +255,7 @@ export default function WordCV({ controls }: WordCVProps) {
       {controls.active &&
         pages &&
         createPortal(
-          <div data-cv-print="">
+          <div data-cv-print="" lang={LOCALE[lang]}>
             <Sheets blocks={blocks} pages={pages} name={resume.basics?.name} />
           </div>,
           document.body,

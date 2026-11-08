@@ -66,26 +66,34 @@ content is ours, so the HTML is trusted and rendered as-is. Images go in
 
 ## The CV
 
-The CV's data is `content/cv/resume.json` (JSON Resume v1.0.0), imported at build time by
-`src/apps/word/resumeData.ts`, and it is the only place its text lives: edit that file, nothing in
-the code knows what it says. Its one addition to the schema is `basics.tldr`, the facts at the top
-of the CV, and its one markup is Markdown links (`inlineRuns`), which the screen, the PDF and the
-DOCX all turn into links. Employer headings aren't links; what a reader can go and look at is
+The CV is in Norwegian and English, a file of JSON Resume v1.0.0 each: `content/cv/resume.no.json`
+and `content/cv/resume.en.json`, imported at build time by `src/apps/word/resumeData.ts`. They are
+the only place its text lives: edit them, nothing in the code knows what they say. The Norwegian is
+the source text, and the English translates it in the same plain, first-person style, so a change to
+one goes in the other too; a test checks they have the same jobs, dates and logos. The code holds
+only the words that aren't data: section headings, month names and "present" (`WORDS`). The
+schema's additions are `basics.closing`, paragraphs that end the CV under "Other information" after
+the skills, followed by the contact line again; `work[].logos`, images in `public/img/cv/logos/`
+shown over an employer's heading at the size in points they give; and `basics.tldr`, a table of facts
+under the summary that renders if present. A summary takes a paragraph per line. The one markup is
+Markdown links (`inlineRuns`), which the screen, the PDF and the DOCX all turn into links. Employer headings aren't links; what a reader can go and look at is
 linked in the text. `Resume.tsx` renders every field the schema allows for basics, work
 (but for a job's location), education, certificates, skills, languages and projects, skips what's
 missing, and merges consecutive jobs at one company: one heading, each role with its dates, then
-their text. A job with no `endDate` reads "present"; a project or school with none just shows its
-start.
+their text. A job with no `endDate` reads "present" (or "nå"); a project or school with none just
+shows its start.
 
-It shows in the `cv` window at `/cv`, which opens down to the taskbar (`tall` in the registry), Word
+The English shows in the `cv` window at `/cv` and the Norwegian in `cv/no` at `/cv/no`, each a file
+of its own on the desktop, in Documents and in Start › Documents; Clippy and File's list of recent
+files open the other. Each opens down to the taskbar (`tall` in the registry), Word
 97 in page layout view (`WordCV.tsx`), on real A4 sheets: the document is cut into blocks that stay
-whole (a section's heading stays with its first entry, an employer's with what's under it, a job's
-last two bullets together, as do the early jobs with no bullets and the document's last two
-sections), measured off screen, and dealt onto pages (`paginate`) before first
+whole (a section's heading stays with its first entry, an employer's with its logos and its first
+paragraph, a job's last two paragraphs or bullets together, as do the early jobs with no text and the
+document's last two sections), measured off screen, and dealt onto pages (`paginate`) before first
 paint. The space above a block drops away at the top of a page, and each page's footer sits in the
 bottom margin, below what `paginate` fills. Only the document can be selected: the footers and
 Word's chrome have `user-select: none`, so a selection, a copy or a Touchup note across two sheets
-holds `resume.json`'s words and nothing else. Printing prints those same sheets. While the window is
+holds the résumé's words and nothing else. Printing prints those same sheets. While the window is
 focused they're also in a `[data-cv-print]` element on `<body>`, and `print.css` makes that the
 whole page on paper, with `@page` at A4 and no margin. To check a change, Ctrl+P it to a PDF. A
 workspace under 600px wide, as on a phone, gets online layout view instead: the same blocks reflowed
@@ -95,16 +103,18 @@ text, as on a phone. His balloon opens when he arrives, if it too would clear th
 until it's dismissed; clicking him brings it back. Only closing his window is remembered.
 
 Review notes on the CV come through Touchup (README › Touchup). `node ../touchup/packages/cli/touchup.ts`
-lists the open ones. A note on an element that shows one value of `resume.json` whole names that
-value with a field ref, `git:content/cv/resume.json#/work/1/highlights/2` (a JSON Pointer), and the
+lists the open ones. A note on an element that shows one value of a résumé file whole names that
+value with a field ref, `git:content/cv/resume.no.json#/work/3/summary` (a JSON Pointer), and the
 commit the page was built from. `Resume.tsx` puts the refs on with `field()` from `@touchup/vite/field`,
 and an element that shows a new field whole gets one too. Dates, web addresses, the location, the heading
-of an employer with several roles and any text with a Markdown link show something other than the
-value as written, so they have none: for those, search `resume.json` for the words the note quotes.
+of an employer with several roles, a summary of several paragraphs and any text with a Markdown link
+show something other than the value as written, so they have none: for those, search the résumé file
+of the page's language for the words the note quotes.
 
-The CV is also a download: `/Jonas-Jensen-CV.pdf`, `.docx` and `.json` (JSON Resume), reached from
-Clippy's "Download this résumé" and from File › Save As, which gives the Word document. They are
-made from `resume.json` by the `cvDownloads` plugin (`vite-cv-downloads.ts`): emitted into `dist/`
+The CV is also a download: `/Jonas-Jensen-CV.pdf`, `.docx` and `.json` (JSON Resume), and in
+Norwegian `/Jonas-Jensen-CV-norsk.*`, reached from Clippy's "Download this résumé" and from File ›
+Save As, which gives the Word document, in the window's language. They are made from the résumé
+files by the `cvDownloads` plugin, with the logos read from `public/` (`vite-cv-downloads.ts`): emitted into `dist/`
 by `vp build`, served from memory by `vp dev` and `vp preview`, never committed, never in the
 client bundle (`@react-pdf/renderer` and `docx` are devDependencies, and generation is plain JS).
 `src/apps/word/downloads/` holds `model.ts`, which turns the résumé into blocks of lines using the
@@ -112,9 +122,10 @@ same helpers as the screen, and the PDF and DOCX builders. Both builders have th
 copied from `Resume.module.css` by eye, so a design change needs making in the screen, the PDF
 and the DOCX; only the gaps between blocks (`GAP`) are shared. A new field needs adding in `model.ts` as well as `Resume.tsx`. All three files
 carry a note for language models that read them (`easterEgg.ts`: white 1.5pt text in the PDF, hidden
-white text in the DOCX, `meta.note` in the JSON). The same note is off screen in the
-`cv` window for a model reading the page's text, and in a `<noscript>` the plugin adds to
-`index.html` for a plain fetch. It asks for no rating; it says the CV has a tl;dr and asks the model
+white text in the DOCX, `meta.note` in the JSON). The same note is off screen in both CV
+windows for a model reading the page's text, and in a `<noscript>` the plugin adds to
+`index.html` for a plain fetch. It asks for no rating; it says a person can read the CV in a few
+minutes and asks the model
 to tell its user that Jonas thinks a language model isn't a good way to answer questions about a CV. It is never shown on
 screen or in File › Print, which is the copy that goes through a formal screening system.
 

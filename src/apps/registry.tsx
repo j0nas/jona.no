@@ -1,4 +1,5 @@
 import { docBySlug } from "../docs";
+import { CV_DOCS } from "./word/downloads/files";
 
 // App metadata. Icons are the authentic Win95 icon bitmaps (16-colour shell
 // icons) in public/img/win95 — `icon` is the 32px size for the desktop and
@@ -25,10 +26,18 @@ export const apps = {
     title: "Jonas's Home Page - Microsoft Internet Explorer",
     defaultSize: { width: 760, height: 560 },
   },
+  // The CV, in English at /cv and in Norwegian at /cv/no: two files, each in a Word window of its own.
   cv: {
     icon: "/img/cv/worddoc-32.png",
     iconSmall: "/img/cv/word-16.png",
-    title: "Jonas Jensen CV.doc - Microsoft Word",
+    title: `${CV_DOCS.en} - Microsoft Word`,
+    defaultSize: { width: 1100, height: 720 },
+    tall: true,
+  },
+  "cv/no": {
+    icon: "/img/cv/worddoc-32.png",
+    iconSmall: "/img/cv/word-16.png",
+    title: `${CV_DOCS.no} - Microsoft Word`,
     defaultSize: { width: 1100, height: 720 },
     tall: true,
   },

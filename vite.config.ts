@@ -20,12 +20,8 @@ const embeddedProxy = Object.fromEntries(
 export default defineConfig({
   // touchupSource stamps each element with the file and line it's written at, so a Touchup note says
   // where. Before react(): it reads the JSX as written. With `data`, an element of the CV that shows
-  // a value of resume.json says which (field() in Resume.tsx); `revision` names the commit built.
-  plugins: [
-    touchupSource({ data: "content/cv/resume.json", revision: true }),
-    react(),
-    cvDownloads(),
-  ],
+  // a value of a résumé file says which (field() in Resume.tsx); `revision` names the commit built.
+  plugins: [touchupSource({ data: "content/cv/*.json", revision: true }), react(), cvDownloads()],
   // jonass-mbp: reading the CV from another device on the network, with `vp dev --host`. Touchup's
   // project has that origin too (README.md › Touchup).
   server: { proxy: embeddedProxy, allowedHosts: ["jonass-mbp"] },

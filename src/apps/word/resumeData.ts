@@ -1,7 +1,14 @@
-import resumeJson from "../../../content/cv/resume.json";
+import en from "../../../content/cv/resume.en.json";
+import no from "../../../content/cv/resume.no.json";
 
-// The CV's data: content/cv/resume.json (JSON Resume v1.0.0). Every field is optional here, whatever
-// the file happens to hold today, so a section or field that isn't there just doesn't render.
+// The CV's data: content/cv/resume.<lang>.json (JSON Resume v1.0.0), one file in each language. Every
+// field is optional here, whatever the files happen to hold today, so a section or field that isn't
+// there just doesn't render.
+
+export type Lang = "en" | "no";
+
+/** Each language's tag, for `lang`, Intl and the files' metadata. The English is British. */
+export const LOCALE: Record<Lang, string> = { en: "en-GB", no: "nb-NO" };
 export interface Location {
   address?: string;
   postalCode?: string;
@@ -25,17 +32,30 @@ export interface Fact {
 export interface Basics {
   name?: string;
   label?: string;
+  /** Beside his name, as Norwegian CVs have it. Not in JSON Resume's schema either. */
+  birthDate?: string;
   email?: string;
   phone?: string;
   url?: string;
   tldr?: Fact[];
   summary?: string;
+  /** Paragraphs that end the CV, after its skills and before its contact line again. Not in JSON Resume's schema either. */
+  closing?: string[];
   location?: Location;
   profiles?: Profile[];
 }
 
+/** A logo over an employer's heading, at its size in points. Not in JSON Resume's schema either. */
+export interface Logo {
+  /** Its address on this site: the file is in public/. */
+  image?: string;
+  width?: number;
+  height?: number;
+}
+
 export interface Work {
   name?: string;
+  logos?: Logo[];
   position?: string;
   url?: string;
   startDate?: string;
@@ -100,15 +120,52 @@ export interface Resume {
   projects?: Project[];
 }
 
-export const resume = resumeJson as unknown as Resume;
+export const resumes: Record<Lang, Resume> = { en, no } as unknown as Record<Lang, Resume>;
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/** A date of birth's parts, as each language's `born` puts them together. */
+interface Birth {
+  year: string;
+  month: string;
+  monthName: string;
+  day: string;
+}
+
+/** The CV's own words, where the data has none: its section headings, months and an open end. */
+export const WORDS = {
+  en: {
+    months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    present: "present",
+    born: ({ year, monthName, day }: Birth) => `b. ${Number(day)} ${monthName} ${year}`,
+    experience: "Work experience",
+    projects: "Projects",
+    education: "Education and certificates",
+    languages: "Languages",
+    other: "Other information",
+  },
+  no: {
+    months: ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
+    present: "nå",
+    born: ({ year, month, day }: Birth) => `f. ${day}.${month}.${year}`,
+    experience: "Arbeidserfaring",
+    projects: "Prosjekter",
+    education: "Utdanning og sertifikat",
+    languages: "Språk",
+    other: "Annen info",
+  },
+} satisfies Record<Lang, unknown>;
 
 /** An ISO 8601 date as JSON Resume allows it: "2022-08-15" or "2022-08" → "Aug 2022", "2022" → "2022". */
-export function formatDate(date: string): string {
+export function formatDate(date: string, lang: Lang = "en"): string {
   const [year, month] = date.split("-");
-  const name = MONTHS[Number(month) - 1];
+  const name = WORDS[lang].months[Number(month) - 1];
   return name ? `${name} ${year}` : year;
+}
+
+/** "f. 24.12.1992", "b. 24 Dec 1992": a full ISO date of birth, as each language writes it. */
+export function formatBirthDate(date: string, lang: Lang = "en"): string {
+  const [year, month, day] = date.split("-");
+  const monthName = WORDS[lang].months[Number(month) - 1];
+  return monthName && day ? WORDS[lang].born({ year, month, monthName, day }) : year;
 }
 
 /**
@@ -116,11 +173,12 @@ export function formatDate(date: string): string {
  * only say when they started, since a project from 2014 hasn't been running since then just because
  * nobody wrote down when it finished.
  */
-export function dateRange(start?: string, end?: string, open = true): string {
-  if (start && start === end) return formatDate(start);
-  if (start && end) return `${formatDate(start)} – ${formatDate(end)}`;
-  if (start) return open ? `${formatDate(start)} – present` : formatDate(start);
-  return end ? formatDate(end) : "";
+export function dateRange(start?: string, end?: string, open = true, lang: Lang = "en"): string {
+  const date = (d: string) => formatDate(d, lang);
+  if (start && start === end) return date(start);
+  if (start && end) return `${date(start)} – ${date(end)}`;
+  if (start) return open ? `${date(start)} – ${WORDS[lang].present}` : date(start);
+  return end ? date(end) : "";
 }
 
 /** A URL for reading, on screen and on paper: no scheme, "www." or trailing slash. */
@@ -138,7 +196,12 @@ export interface Inline {
   bold?: boolean;
 }
 
-/** Text with Markdown links in it, the one markup resume.json's strings can hold, as runs. */
+/** A text's paragraphs: a summary can have several, a line each. */
+export function paragraphs(text = ""): string[] {
+  return text.split(/\n+/).filter(Boolean);
+}
+
+/** Text with Markdown links in it, the one markup the résumé's strings can hold, as runs. */
 export function inlineRuns(text: string): Inline[] {
   const runs: Inline[] = [];
   let at = 0;
@@ -151,11 +214,20 @@ export function inlineRuns(text: string): Inline[] {
   return runs;
 }
 
+/** A phone number as a link a phone can call. */
+export function telHref(phone: string): string {
+  return `tel:${phone.replace(/[^\d+]/g, "")}`;
+}
+
 /** "Oslo, Norway", from the parts JSON Resume splits a location into. */
-export function formatLocation({ city, region, countryCode }: Location = {}): string {
+export function formatLocation(
+  { city, region, countryCode }: Location = {},
+  lang: Lang = "en",
+): string {
   let country: string | undefined;
   try {
-    country = countryCode && new Intl.DisplayNames(["en"], { type: "region" }).of(countryCode);
+    country =
+      countryCode && new Intl.DisplayNames([LOCALE[lang]], { type: "region" }).of(countryCode);
   } catch {
     country = countryCode;
   }
@@ -166,6 +238,7 @@ export function formatLocation({ city, region, countryCode }: Location = {}): st
 export interface Employer {
   name?: string;
   url?: string;
+  logos: Logo[];
   roles: Work[];
   /** The text of all its roles, since it goes under the whole stack of them. */
   summaries: string[];
@@ -181,34 +254,37 @@ export function groupByEmployer(work: Work[] = []): Employer[] {
       employer.roles.push(job);
       employer.url ??= job.url;
     } else {
-      employer = { name: job.name, url: job.url, roles: [job], summaries: [], highlights: [] };
+      employer = {
+        name: job.name,
+        url: job.url,
+        logos: [],
+        roles: [job],
+        summaries: [],
+        highlights: [],
+      };
       employers.push(employer);
     }
+    employer.logos.push(...(job.logos ?? []).filter((logo) => logo.image));
     if (job.summary) employer.summaries.push(job.summary);
     employer.highlights.push(...(job.highlights ?? []));
   }
   return employers;
 }
 
+/** An employer with no text, which only has its heading and roles to say. */
+export function isEarly({ summaries, highlights }: Employer): boolean {
+  return !summaries.length && !highlights.length;
+}
+
 /**
- * An employer's highlights in the groups that stay whole on a page. The last two go together, so no
- * bullet ends up alone at the top of a page. `head` stays with the employer's heading, which needs
- * something under it: its summary will do, unless that would leave a lone highlight on its own.
- * Generic, so the screen can group its highlights with each one's field ref.
+ * An employer's text, its summaries' paragraphs and then its highlights, in the groups that stay
+ * whole on a page. `head` stays with the employer's heading, which needs something under it. The
+ * last two go together, so neither a bullet nor a paragraph ends up alone at the top of a page.
+ * Generic, so the screen can group its text with each piece's field ref.
  */
-export function highlightGroups<T>({
-  summaries,
-  highlights,
-}: {
-  summaries: string[];
-  highlights: T[];
-}): {
-  head: T[];
-  rest: T[][];
-} {
-  const singles = highlights.slice(0, -2).map((highlight) => [highlight]);
-  const groups = highlights.length ? [...singles, highlights.slice(-2)] : [];
-  if (summaries.length && highlights.length !== 1) return { head: [], rest: groups };
+export function textGroups<T>(pieces: T[]): { head: T[]; rest: T[][] } {
+  const singles = pieces.slice(0, -2).map((piece) => [piece]);
+  const groups = pieces.length ? [...singles, pieces.slice(-2)] : [];
   return { head: groups[0] ?? [], rest: groups.slice(1) };
 }
 
@@ -238,11 +314,11 @@ export function credentials({ education = [], certificates = [] }: Resume): Cred
 }
 
 /** What a project's title row has flush right: its address, unless the title already is that. */
-export function projectRight(project: Project): string {
+export function projectRight(project: Project, lang: Lang = "en"): string {
   const { name, url, startDate, endDate } = project;
   const address = url && displayUrl(url);
   return [address?.toLowerCase() === name?.toLowerCase() ? undefined : address]
-    .concat(dateRange(startDate, endDate, false))
+    .concat(dateRange(startDate, endDate, false, lang))
     .filter(Boolean)
     .join("  ·  ");
 }
@@ -262,13 +338,16 @@ export function footerLabel(name?: string): string {
 
 /**
  * The space above a block, in points. Within a block the spacing is each form's own: 3 after the
- * role, 4 between bullets, 2 within a project, 8 below a section's rule.
+ * role, 4 between paragraphs and bullets, 2 within a project, 8 below a section's rule.
  */
 export const GAP = {
+  /** The summary, under the contact line. */
+  summary: 12,
   section: 32,
   job: 20,
-  /** An early job with no bullets, which only has a line or two to say. */
+  /** An early job with no text, which only has a line or two to say. */
   earlyJob: 10,
+  /** A paragraph or a bullet. */
   bullet: 4,
   project: 8,
 };

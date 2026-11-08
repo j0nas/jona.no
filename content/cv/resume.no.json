@@ -1,0 +1,198 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
+  "basics": {
+    "name": "Jonas Jensen",
+    "label": "Senior fullstack-utvikler",
+    "birthDate": "1992-12-24",
+    "email": "hi@jona.no",
+    "phone": "942 92 594",
+    "url": "https://jona.no",
+    "summary": "Jeg er en som elsker ny teknologi og har programmert nesten hele mitt liv. Mitt fokus er å løse utfordringer gjennom å arbeide med dem som bruker systemet og implementere løsninger som gjør deres hverdag bedre. De siste årene har jeg jobbet som konsulent og da fått muligheten til å bryne meg på veldig mange krevende prosjekter. Jeg bor på Bjørndal i Oslo med min samboer og med vår hund, Bazooka.",
+    "closing": [
+      "Mine interesser er trening, snekring og i stor grad programmering – spør meg gjerne om ett av mine over 40 prosjekter, inkludert bruk av coding agents, MCP og lokale modeller, som jeg har kost meg med de siste månedene.",
+      "Kontakt meg gjerne dersom det er noe mer du vil vite."
+    ],
+    "location": {
+      "city": "Oslo",
+      "region": "Oslo",
+      "countryCode": "NO"
+    },
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "username": "j0nas",
+        "url": "https://www.linkedin.com/in/j0nas/"
+      },
+      {
+        "network": "GitHub",
+        "username": "j0nas",
+        "url": "https://github.com/j0nas"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "Ruter AS / Tet Digital",
+      "logos": [
+        {
+          "image": "/img/cv/logos/tet.png",
+          "width": 44,
+          "height": 16
+        }
+      ],
+      "position": "Fullstack-utvikler, konsulent",
+      "startDate": "2022-08",
+      "endDate": "2026-06",
+      "summary": "Systemer for å organisere tilrettelagt transport for Oslo kommune, et tilbud for dem som ikke kan bruke vanlig kollektivtransport, med rundt 900 000 turer i året.\nNoe av det jeg gjorde for Tet var å rette opp en ustabil backend, rydde opp i langvarig teknisk gjeld, lage ny systemarkitektur og infrastruktur, sette opp et tre ganger så raskt automatisk testmiljø og lage gode utviklerverktøy for teamene våre. Jeg var i tillegg Security Champion (representant for sikkerhetsinitiativet til Tet) for mitt team.\nTok initiativ til intervjuer med skoler og dagsentre som var brukere av våre tjenester. Dette førte til to nye apper: en daglig oversikt over reisende for institusjonene, og en app for skoletransport."
+    },
+    {
+      "name": "Rellio",
+      "logos": [
+        {
+          "image": "/img/cv/logos/rellio.png",
+          "width": 63,
+          "height": 18.5
+        }
+      ],
+      "position": "Co-founder og CTO",
+      "startDate": "2022-12",
+      "endDate": "2025-08",
+      "summary": "[Rellio](https://www.rellio.no) er en plattform for eiendomsmeglere for å samarbeide med alle aktører involvert i salg av eiendom, alt fra foto, takst og styling til den som skal selge. Jeg startet dette sammen med en boligfotograf, og vi bygget det på kvelder og i helgene ved siden av jobben.\nJeg samarbeidet direkte med eiendomsmeglere for å kartlegge flyt og behov, kjørte brukertesting og implementerte integrasjon med systemer som allerede er godt etablert i bransjen. Fulgte opp arbeidet til flere uavhengige utviklere på prosjektet og skrev mesteparten av de rundt 56 000 linjene med TypeScript som utgjorde løsningen. Forlot prosjektet i 2025 og overlot eierskap og kodebase til min co-founder. Det lever videre og har fremdeles betalende brukere."
+    },
+    {
+      "name": "Minus AS",
+      "logos": [
+        {
+          "image": "/img/cv/logos/minus.png",
+          "width": 78,
+          "height": 27.3
+        },
+        {
+          "image": "/img/cv/logos/snl.png",
+          "width": 42,
+          "height": 31.3
+        }
+      ],
+      "position": "Fullstack-utvikler, konsulent",
+      "startDate": "2019-04",
+      "endDate": "2022-07",
+      "summary": "Minus er et konsulenthus i Oslo. Mesteparten av tiden jobbet jeg for Store norske leksikon ([snl.no](https://snl.no)), Norges nasjonale leksikon med rundt 2,9 millioner lesere i måneden (2021).\nJeg ledet et team på mellom to og tre personer, og skrev om plattformen til en cloud native-applikasjon i Google Cloud mens vi fortsatt shippet nye features. Lærte også Ruby on Rails for denne jobben, og fikk ryddet opp i den eksisterende kodebasen. Systemet ble så solid at det også ble tatt i bruk av det danske nasjonale leksikonet ([lex.dk](https://lex.dk)).\nMindre prosjekter for Minus var å ta Lighthouse-scoren til [sanity.io](https://www.sanity.io), en innholdsplattform, fra 35 til 85+, og å flytte Foodsteps, en matlagingsapp, fra Heroku til Google Cloud ved hjelp av Terraform. For OsloMet jobbet jeg med sluttbrukere for å lage et tracking-system for søknader om forskningsmidler, og var mentor for andre på prosjektet."
+    },
+    {
+      "name": "AP-Performance",
+      "logos": [
+        {
+          "image": "/img/cv/logos/ap-performance.png",
+          "width": 113,
+          "height": 24.2
+        }
+      ],
+      "position": "Freelance-utvikler",
+      "startDate": "2020",
+      "endDate": "2020",
+      "summary": "Treningsdagbok for oppfølging av personlige trenere og deres kunder. Dette var et prosjekt ved siden av jobben i Minus. Skrev om legacy Android-appen fra scratch i React Native og publiserte den på App Store og Google Play. Laget et Node.js-API for å koble den til legacy PHP-webappen deres, la til støtte for Docker og flyttet webappen og databasen til Google Cloud."
+    },
+    {
+      "name": "Greenbird Integration Technology",
+      "logos": [
+        {
+          "image": "/img/cv/logos/greenbird.png",
+          "width": 92,
+          "height": 19.1
+        }
+      ],
+      "position": "Seniorutvikler",
+      "startDate": "2018-06",
+      "endDate": "2019-02",
+      "summary": "Greenbird laget programvare til kraftselskap. Jeg var frontend lead, valgte teknologi og best practices og bygget UI for mesteparten av løsningen, inkludert integrasjonsplattformen og datavisualisering til energisektoren. Ble forfremmet etter første år, og fikk enda mer ansvar og mulighet til å utvikle meg."
+    },
+    {
+      "name": "Greenbird Integration Technology",
+      "position": "Utvikler",
+      "startDate": "2017-06",
+      "endDate": "2018-06"
+    },
+    {
+      "name": "Netcompany A/S",
+      "logos": [
+        {
+          "image": "/img/cv/logos/netcompany.png",
+          "width": 98,
+          "height": 14.7
+        }
+      ],
+      "position": "Analytiker og fullstack-utvikler",
+      "startDate": "2016-08",
+      "endDate": "2017-05",
+      "summary": "Var frontend lead for et team på fem hos Møller Mobility Group. Blant annet besøkte jeg bruktbilsentre og intervjuet ansatte for å lære prosessen deres, og bygget så systemer som kartla hvor hver bil var og hvilket arbeid som var utført på den. Laget et UI-komponentbibliotek for alle Møller sine utviklere og var mentor for andre. Skrev min bacheloroppgave basert på en webapplikasjon for å erstatte et legacy-system hos Møller, som fikk meg denne stillingen i utgangspunktet."
+    },
+    {
+      "name": "Westerdals Oslo ACT",
+      "position": "Læringsassistent i programmering",
+      "startDate": "2014-08",
+      "endDate": "2015-12"
+    },
+    {
+      "name": "Forbrukerrådet",
+      "position": "IT-lærling, senere IT-support",
+      "startDate": "2011-07",
+      "endDate": "2013-07"
+    }
+  ],
+  "education": [
+    {
+      "institution": "Westerdals Oslo ACT",
+      "studyType": "Bachelorgrad",
+      "area": "informasjonsteknologi (programmering)",
+      "startDate": "2013",
+      "endDate": "2016"
+    },
+    {
+      "institution": "Forbrukerrådet",
+      "studyType": "Fagbrev",
+      "area": "dataelektronikk",
+      "endDate": "2012-12"
+    }
+  ],
+  "certificates": [
+    {
+      "name": "Certified CyberSecurity Professional – Web Security",
+      "issuer": "Watchcom Security Group AS",
+      "date": "2017-01"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Stack jeg har jobbet med",
+      "keywords": [
+        "TypeScript",
+        "React",
+        "React Native",
+        "Next.js",
+        "Node",
+        "Kotlin",
+        "Ruby on Rails",
+        "GraphQL",
+        "PostgreSQL",
+        "Google Cloud",
+        "Kubernetes",
+        "Docker",
+        "Terraform"
+      ]
+    }
+  ],
+  "languages": [
+    {
+      "language": "Engelsk",
+      "fluency": "flytende"
+    },
+    {
+      "language": "Norsk",
+      "fluency": "morsmål"
+    },
+    {
+      "language": "Russisk",
+      "fluency": "meget godt"
+    }
+  ]
+}

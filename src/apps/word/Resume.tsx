@@ -6,18 +6,25 @@ import {
   dateRange,
   displayUrl,
   footerLabel,
+  formatBirthDate,
   formatDate,
   formatLocation,
   groupByEmployer,
-  highlightGroups,
   inlineRuns,
+  isEarly,
+  paragraphs,
   projectRight,
   schoolStudy,
   studyKeys,
+  telHref,
+  textGroups,
+  WORDS,
+  type Basics,
   type Certificate,
   type Education,
   type Employer,
   type Fact,
+  type Lang,
   type Language,
   type Project,
   type Resume,
@@ -40,7 +47,7 @@ function Link({ href, children }: { href: string; children?: ReactNode }) {
   );
 }
 
-/** Text from resume.json, with its links. */
+/** Text from the résumé, with its links. */
 function Rich({ text }: { text: string }) {
   return (
     <>
@@ -58,13 +65,14 @@ function Rich({ text }: { text: string }) {
 }
 
 /**
- * field() for text that Rich shows. A Markdown link shows its words without its address, so a value
- * with one isn't what the element shows, and gets no ref: Touchup takes the element's text to be
- * the whole value.
+ * field() for text that Rich shows. A Markdown link shows its words without its address, and a value
+ * of several paragraphs shows across several elements, so neither is what an element shows, and
+ * gets no ref: Touchup takes the element's text to be the whole value.
  */
 function richField<T extends object>(parent: T, key: keyof T & (string | number)): FieldAttribute {
   const value: unknown = parent[key];
-  if (typeof value !== "string" || inlineRuns(value).some((run) => run.href)) return {};
+  if (typeof value !== "string" || value.includes("\n")) return {};
+  if (inlineRuns(value).some((run) => run.href)) return {};
   return field(parent, key);
 }
 
@@ -100,16 +108,24 @@ function Line({
   );
 }
 
-/** A highlight, and the ref of the value it is. */
-interface Bullet {
+/** A paragraph or a highlight, and the ref of the value it is. */
+interface Piece {
   text: string;
   field: FieldAttribute;
+  bullet?: boolean;
 }
 
-const bulletsOf = (list: string[] = []): Bullet[] =>
-  list.map((text, i) => ({ text, field: richField(list, i) }));
+const bulletsOf = (list: string[] = []): Piece[] =>
+  list.map((text, i) => ({ text, field: richField(list, i), bullet: true }));
 
-function Bullets({ items }: { items: Bullet[] }) {
+/** A value's paragraphs, which have its ref if it's just the one. */
+function paragraphsOf<T extends object>(parent: T, key: keyof T & string): Piece[] {
+  const value: unknown = parent[key];
+  if (typeof value !== "string") return [];
+  return paragraphs(value).map((text) => ({ text, field: richField(parent, key) }));
+}
+
+function Bullets({ items }: { items: Piece[] }) {
   if (!items.length) return null;
   return (
     <ul className={styles.bullets}>
@@ -122,6 +138,26 @@ function Bullets({ items }: { items: Bullet[] }) {
   );
 }
 
+/** Paragraphs as paragraphs, and a run of bullets as a list. */
+function Pieces({ items }: { items: Piece[] }) {
+  const nodes: ReactNode[] = [];
+  items.forEach((item, i) => {
+    if (item.bullet) {
+      if (!items[i - 1]?.bullet) {
+        const end = items.findIndex((next, j) => j > i && !next.bullet);
+        nodes.push(<Bullets key={i} items={items.slice(i, end < 0 ? undefined : end)} />);
+      }
+    } else {
+      nodes.push(
+        <p key={i} className={styles.text} {...item.field}>
+          <Rich text={item.text} />
+        </p>,
+      );
+    }
+  });
+  return nodes;
+}
+
 function SectionHeading({ children }: { children: ReactNode }) {
   return <h2 className={styles.section}>{children}</h2>;
 }
@@ -131,16 +167,28 @@ function SectionHeading({ children }: { children: ReactNode }) {
  * A heading over several roles shows the name each of them has, and an edit through a ref to one
  * would split them, so it has none.
  */
-function JobHead({ employer }: { employer: Employer }) {
+function JobHead({ employer, lang }: { employer: Employer; lang: Lang }) {
   const name = employer.url ? <Link href={employer.url}>{employer.name}</Link> : employer.name;
   const only = employer.roles.length === 1 ? employer.roles[0] : undefined;
   return (
-    <div className={`${styles.jobHead}${employer.highlights.length ? "" : ` ${styles.early}`}`}>
+    <div className={`${styles.jobHead}${isEarly(employer) ? ` ${styles.early}` : ""}`}>
+      {!!employer.logos.length && (
+        <div className={styles.logos}>
+          {employer.logos.map((logo, i) => (
+            <img
+              key={i}
+              src={logo.image}
+              alt=""
+              style={{ width: `${logo.width}pt`, height: `${logo.height}pt` }}
+            />
+          ))}
+        </div>
+      )}
       <Line
         className={styles.employer}
         left={name}
         leftField={only && field(only, "name")}
-        right={only && dateRange(only.startDate, only.endDate)}
+        right={only && dateRange(only.startDate, only.endDate, true, lang)}
       />
       {employer.roles.map((role, i) => (
         <Line
@@ -148,14 +196,14 @@ function JobHead({ employer }: { employer: Employer }) {
           className={styles.role}
           left={role.position}
           leftField={field(role, "position")}
-          right={!only && dateRange(role.startDate, role.endDate)}
+          right={!only && dateRange(role.startDate, role.endDate, true, lang)}
         />
       ))}
     </div>
   );
 }
 
-function School({ school }: { school: Education }) {
+function School({ school, lang }: { school: Education; lang: Lang }) {
   const study = schoolStudy(school);
   const name = school.url ? (
     <Link href={school.url}>{school.institution}</Link>
@@ -175,7 +223,7 @@ function School({ school }: { school: Education }) {
             <span {...field(school, "institution")}>{name}</span>
           </>
         }
-        right={dateRange(school.startDate, school.endDate, false)}
+        right={dateRange(school.startDate, school.endDate, false, lang)}
       />
       {school.score && (
         <p className={styles.text} {...field(school, "score")}>
@@ -194,7 +242,7 @@ function School({ school }: { school: Education }) {
   );
 }
 
-function CertificateRow({ certificate }: { certificate: Certificate }) {
+function CertificateRow({ certificate, lang }: { certificate: Certificate; lang: Lang }) {
   const { name, url, issuer, date } = certificate;
   return (
     <Line
@@ -206,12 +254,12 @@ function CertificateRow({ certificate }: { certificate: Certificate }) {
           <span {...field(certificate, "issuer")}>{issuer}</span>
         </>
       }
-      right={date && formatDate(date)}
+      right={date && formatDate(date, lang)}
     />
   );
 }
 
-function ProjectEntry({ project }: { project: Project }) {
+function ProjectEntry({ project, lang }: { project: Project; lang: Lang }) {
   const title = project.url ? <Link href={project.url}>{project.name}</Link> : project.name;
   return (
     <>
@@ -219,7 +267,7 @@ function ProjectEntry({ project }: { project: Project }) {
         className={styles.project}
         left={title}
         leftField={field(project, "name")}
-        right={projectRight(project)}
+        right={projectRight(project, lang)}
       />
       {(project.entity || project.type || !!project.roles?.length) && (
         <p className={styles.note}>
@@ -326,13 +374,11 @@ function Tldr({ facts }: { facts: Fact[] }) {
   );
 }
 
-function Header({ resume }: { resume: Resume }) {
-  const { basics } = resume;
-  if (!basics) return null;
+/** Where to find him: the header's line, and the closing's. The phone comes last, as on paper. */
+function contactItems(basics: Basics, lang: Lang): ReactNode[] {
   const contact: ReactNode[] = [];
-  const location = formatLocation(basics.location);
+  const location = formatLocation(basics.location, lang);
   if (location) contact.push(location);
-  if (basics.phone) contact.push(<span {...field(basics, "phone")}>{basics.phone}</span>);
   if (basics.email) {
     contact.push(
       <a href={`mailto:${basics.email}`} {...field(basics, "email")}>
@@ -345,25 +391,47 @@ function Header({ resume }: { resume: Resume }) {
     if (profile.url) contact.push(<Link href={profile.url} />);
     else if (profile.username) contact.push(`${profile.network}: ${profile.username}`);
   }
+  if (basics.phone) {
+    contact.push(
+      <a href={telHref(basics.phone)} {...field(basics, "phone")}>
+        {basics.phone}
+      </a>,
+    );
+  }
+  return contact;
+}
+
+function Contact({ basics, lang, className }: { basics: Basics; lang: Lang; className: string }) {
+  return (
+    <p className={className}>
+      {contactItems(basics, lang).map((item, i) => (
+        <span key={i} className={styles.contactItem}>
+          {item}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function Header({ basics, lang }: { basics: Basics; lang: Lang }) {
   return (
     <header>
-      {basics.name && (
-        <h1 className={styles.name} {...field(basics, "name")}>
-          {basics.name}
-        </h1>
-      )}
+      <div className={styles.nameLine}>
+        {basics.name && (
+          <h1 className={styles.name} {...field(basics, "name")}>
+            {basics.name}
+          </h1>
+        )}
+        {basics.birthDate && (
+          <span className={styles.born}>{formatBirthDate(basics.birthDate, lang)}</span>
+        )}
+      </div>
       {basics.label && (
         <p className={styles.label} {...field(basics, "label")}>
           {basics.label}
         </p>
       )}
-      <p className={styles.contact}>
-        {contact.map((item, i) => (
-          <span key={i} className={styles.contactItem}>
-            {item}
-          </span>
-        ))}
-      </p>
+      <Contact basics={basics} lang={lang} className={styles.contact} />
     </header>
   );
 }
@@ -376,11 +444,14 @@ function gapStyle(gap: number, top: boolean) {
 /**
  * The CV as unbreakable blocks, for Word's page breaks. A section's heading is glued to its first
  * entry and an employer's to what's under it, so neither can end a page alone, and a job's last two
- * highlights stay together, so one can't start a page alone.
+ * paragraphs or bullets stay together, so one can't start a page alone.
  */
-export function resumeBlocks(resume: Resume): ResumeBlock[] {
-  const { basics } = resume;
-  const blocks: ResumeBlock[] = [{ key: "header", gap: 0, node: <Header resume={resume} /> }];
+export function resumeBlocks(resume: Resume, lang: Lang = "en"): ResumeBlock[] {
+  const { basics = {} } = resume;
+  const words = WORDS[lang];
+  const blocks: ResumeBlock[] = [
+    { key: "header", gap: 0, node: <Header basics={basics} lang={lang} /> },
+  ];
 
   const section = (title: string, entries: Omit<ResumeBlock, "key">[]) => {
     entries.forEach(({ gap, node }, i) => {
@@ -399,42 +470,32 @@ export function resumeBlocks(resume: Resume): ResumeBlock[] {
     });
   };
 
-  if (basics?.tldr?.length) {
-    section("tl;dr", [{ gap: 0, node: <Tldr facts={basics.tldr} /> }]);
+  if (basics.summary) {
+    blocks.push({
+      key: "summary",
+      gap: GAP.summary,
+      node: <Pieces items={paragraphsOf(basics, "summary")} />,
+    });
   }
 
-  if (basics?.summary) {
-    section("How I work", [
-      {
-        gap: 0,
-        node: (
-          <p className={styles.text} {...richField(basics, "summary")}>
-            <Rich text={basics.summary} />
-          </p>
-        ),
-      },
-    ]);
+  if (basics.tldr?.length) {
+    section("tl;dr", [{ gap: 0, node: <Tldr facts={basics.tldr} /> }]);
   }
 
   const work: Omit<ResumeBlock, "key">[] = [];
   let earlier = false;
   for (const employer of groupByEmployer(resume.work)) {
-    // Each role's own, for their refs; employer.highlights has lost where each came from.
-    const highlights = employer.roles.flatMap((role) => bulletsOf(role.highlights));
-    const { head, rest } = highlightGroups({ summaries: employer.summaries, highlights });
-    const early = !employer.highlights.length;
+    // Each role's own, for their refs; the employer's text has lost where each piece came from.
+    const pieces = [
+      ...employer.roles.flatMap((role) => paragraphsOf(role, "summary")),
+      ...employer.roles.flatMap((role) => bulletsOf(role.highlights)),
+    ];
+    const { head, rest } = textGroups(pieces);
+    const early = isEarly(employer);
     const node = (
       <>
-        <JobHead employer={employer} />
-        {employer.roles.map(
-          (role, i) =>
-            role.summary && (
-              <p key={i} className={styles.text} {...richField(role, "summary")}>
-                <Rich text={role.summary} />
-              </p>
-            ),
-        )}
-        <Bullets items={head} />
+        <JobHead employer={employer} lang={lang} />
+        <Pieces items={head} />
       </>
     );
     // Early jobs stay together, so a line or two of one can't start a page by itself.
@@ -449,36 +510,32 @@ export function resumeBlocks(resume: Resume): ResumeBlock[] {
     } else {
       work.push({ gap: early ? GAP.earlyJob : GAP.job, node });
     }
-    // The rest of a job's highlights can run on over a page.
-    work.push(...rest.map((group) => ({ gap: GAP.bullet, node: <Bullets items={group} /> })));
+    // The rest of a job's text can run on over a page.
+    work.push(...rest.map((group) => ({ gap: GAP.bullet, node: <Pieces items={group} /> })));
     earlier = early;
   }
-  section("Experience", work);
-
-  if (resume.skills?.length) {
-    section("Skills", [{ gap: 0, node: <Skills skills={resume.skills} /> }]);
-  }
+  section(words.experience, work);
 
   section(
-    "Projects",
+    words.projects,
     (resume.projects ?? []).map((project) => ({
       gap: GAP.project,
-      node: <ProjectEntry project={project} />,
+      node: <ProjectEntry project={project} lang={lang} />,
     })),
   );
 
   const schoolsAndCertificates = credentials(resume);
   if (schoolsAndCertificates.length) {
-    section("Education and certificates", [
+    section(words.education, [
       {
         gap: 0,
         node: (
           <>
             {schoolsAndCertificates.map(({ school, certificate }, i) =>
               school ? (
-                <School key={i} school={school} />
+                <School key={i} school={school} lang={lang} />
               ) : (
-                <CertificateRow key={i} certificate={certificate} />
+                <CertificateRow key={i} certificate={certificate} lang={lang} />
               ),
             )}
           </>
@@ -488,7 +545,7 @@ export function resumeBlocks(resume: Resume): ResumeBlock[] {
   }
 
   if (resume.languages?.length) {
-    section("Languages", [
+    section(words.languages, [
       {
         gap: 0,
         node: (
@@ -499,6 +556,26 @@ export function resumeBlocks(resume: Resume): ResumeBlock[] {
       },
     ]);
   }
+
+  // The skills, then the closing's paragraphs and where to find him, as the end of the letter.
+  const closing = (basics.closing ?? []).map((text, i) => ({
+    text,
+    field: richField(basics.closing!, i),
+  }));
+  const other: Omit<ResumeBlock, "key">[] = [];
+  if (resume.skills?.length) other.push({ gap: 0, node: <Skills skills={resume.skills} /> });
+  if (closing.length) {
+    other.push({
+      gap: GAP.bullet,
+      node: (
+        <>
+          <Pieces items={closing} />
+          <Contact basics={basics} lang={lang} className={styles.closingContact} />
+        </>
+      ),
+    });
+  }
+  section(words.other, other);
 
   // The last two stay together, so the last page can't be one short section by itself.
   if (blocks.length > 2) {
@@ -567,12 +644,14 @@ export function OnlineLayout({ blocks }: { blocks: ResumeBlock[] }) {
 export function Measure({
   blocks,
   measureRef,
+  lang,
 }: {
   blocks: ResumeBlock[];
   measureRef: (element: HTMLDivElement | null) => void;
+  lang: string;
 }) {
   return (
-    <div ref={measureRef} className={styles.measure} aria-hidden="true">
+    <div ref={measureRef} className={styles.measure} lang={lang} aria-hidden="true">
       {blocks.map((block) => (
         <div key={block.key} className={styles.block}>
           {block.node}

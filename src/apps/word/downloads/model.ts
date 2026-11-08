@@ -4,15 +4,21 @@ import {
   dateRange,
   displayUrl,
   footerLabel,
+  formatBirthDate,
   formatDate,
   formatLocation,
   groupByEmployer,
-  highlightGroups,
   inlineRuns,
+  isEarly,
   languageList,
+  paragraphs,
   projectRight,
   schoolStudy,
+  telHref,
+  textGroups,
+  WORDS,
   type Inline,
+  type Lang,
   type Resume,
 } from "../resumeData";
 
@@ -22,10 +28,20 @@ import {
 
 export type { Inline };
 
+/** A logo's file and its size in points. */
+export interface LogoImage {
+  data: Uint8Array;
+  format: "png" | "jpg";
+  width: number;
+  height: number;
+}
+
 /** A line of a block, `before` points below the line above it there. */
 export type Item = { before?: number } & (
-  | /** An employer: bold sans, with its dates flush right when it had just the one role. */
-    { kind: "employer"; text: string; href?: string; right?: string }
+  | /** An employer's logos, side by side over its heading. */
+    { kind: "logos"; logos: LogoImage[] }
+  /** An employer: bold sans, with its dates flush right when it had just the one role. */
+  | { kind: "employer"; text: string; href?: string; right?: string }
   /** A role at an employer: bold italic, with its dates flush right when it's one of several. */
   | { kind: "role"; text: string; right?: string; after: number }
   /** A project: smaller bold sans, with its address flush right unless the title is that. */
@@ -40,6 +56,8 @@ export type Item = { before?: number } & (
   | { kind: "fact"; label: string; runs: Inline[] }
   /** A small italic line. */
   | { kind: "note"; text: string }
+  /** Where to find him, again at the end: small sans, as under his name. */
+  | { kind: "contact"; runs: Inline[] }
   | { kind: "bullet"; runs: Inline[] }
 );
 
@@ -57,10 +75,20 @@ export interface Section {
 
 export interface CvModel {
   name?: string;
+  /** His date of birth, as the language writes it, beside his name. */
+  born?: string;
   label?: string;
   contact: Inline[];
+  /** Its paragraphs, under the contact line, with no heading. */
+  summary: Inline[][];
   footer: string;
   sections: Section[];
+}
+
+export interface ModelOptions {
+  lang?: Lang;
+  /** A logo's file, from its address on the site. Without it, there are no logos. */
+  image?: (src: string) => Uint8Array;
 }
 
 const plain = inlineRuns;
@@ -84,18 +112,19 @@ function pair(first?: string, second?: string, href?: string): Inline[] {
   return runs;
 }
 
-export function buildModel(resume: Resume): CvModel {
+export function buildModel(resume: Resume, { lang = "en", image }: ModelOptions = {}): CvModel {
   const { basics } = resume;
+  const words = WORDS[lang];
   const contact: Inline[] = [];
-  const location = formatLocation(basics?.location);
+  const location = formatLocation(basics?.location, lang);
   if (location) contact.push({ text: location });
-  if (basics?.phone) contact.push({ text: basics.phone });
   if (basics?.email) contact.push({ text: basics.email, href: `mailto:${basics.email}` });
   if (basics?.url) contact.push(...link(basics.url));
   for (const profile of basics?.profiles ?? []) {
     if (profile.url) contact.push(...link(profile.url));
     else if (profile.username) contact.push({ text: `${profile.network}: ${profile.username}` });
   }
+  if (basics?.phone) contact.push({ text: basics.phone, href: telHref(basics.phone) });
 
   const sections: Section[] = [];
   const add = (title: string, blocks: Block[]) => {
@@ -112,35 +141,45 @@ export function buildModel(resume: Resume): CvModel {
     add("tl;dr", [{ gap: 0, items }]);
   }
 
-  if (basics?.summary) {
-    add("How I work", [{ gap: 0, items: [{ kind: "text", runs: plain(basics.summary) }] }]);
-  }
-
   const work: Block[] = [];
   let earlier = false;
   for (const employer of groupByEmployer(resume.work)) {
-    const early = !employer.highlights.length;
+    const early = isEarly(employer);
     const only = employer.roles.length === 1 ? employer.roles[0] : undefined;
-    const { head, rest } = highlightGroups(employer);
+    const pieces: Item[] = [
+      ...employer.summaries
+        .flatMap(paragraphs)
+        .map((text): Item => ({ kind: "text", runs: plain(text) })),
+      ...bullets(employer.highlights),
+    ];
+    // Within a group, a paragraph or a bullet is 4 points below the one before it.
+    const spaced = (group: Item[]) =>
+      group.map((item, i): Item => ({ ...item, before: i ? GAP.bullet : 0 }));
+    const { head, rest } = textGroups(pieces);
+    const logos = image
+      ? employer.logos.map((logo): LogoImage => ({
+          data: image(logo.image!),
+          format: /\.png$/i.test(logo.image!) ? "png" : "jpg",
+          width: logo.width ?? 0,
+          height: logo.height ?? 0,
+        }))
+      : [];
     const items: Item[] = [
+      ...(logos.length ? [{ kind: "logos", logos } as const] : []),
       {
         kind: "employer",
         text: employer.name ?? "",
         href: employer.url,
-        right: only && dateRange(only.startDate, only.endDate),
+        right: only && dateRange(only.startDate, only.endDate, true, lang),
+        before: logos.length ? 6 : 0,
       },
       ...employer.roles.map((role, i): Item => ({
         kind: "role",
         text: role.position ?? "",
-        right: only ? undefined : dateRange(role.startDate, role.endDate),
+        right: only ? undefined : dateRange(role.startDate, role.endDate, true, lang),
         after: !early && i === employer.roles.length - 1 ? 3 : 0,
       })),
-      ...employer.summaries.map((summary, i): Item => ({
-        kind: "text",
-        runs: plain(summary),
-        before: i ? GAP.bullet : 0,
-      })),
-      ...bullets(head, employer.summaries.length ? GAP.bullet : 0),
+      ...spaced(head),
     ];
     // Early jobs stay together, so a line or two of one can't start a page by itself.
     const previous = work.at(-1);
@@ -150,11 +189,11 @@ export function buildModel(resume: Resume): CvModel {
     } else {
       work.push({ gap: early ? GAP.earlyJob : GAP.job, items });
     }
-    // The rest of a job's highlights can run on over a page.
-    for (const group of rest) work.push({ gap: GAP.bullet, items: bullets(group) });
+    // The rest of a job's text can run on over a page.
+    for (const group of rest) work.push({ gap: GAP.bullet, items: spaced(group) });
     earlier = early;
   }
-  add("Experience", work);
+  add(words.experience, work);
 
   const skills: Item[] = [];
   const skillList = resume.skills ?? [];
@@ -172,17 +211,16 @@ export function buildModel(resume: Resume): CvModel {
     .map((s) => s.name)
     .filter(Boolean);
   if (names.length) skills.push({ kind: "skill", runs: plain(names.join(", ")) });
-  add("Skills", skills.length ? [{ gap: 0, items: skills }] : []);
 
   add(
-    "Projects",
+    words.projects,
     (resume.projects ?? []).map((project) => {
       const items: Item[] = [
         {
           kind: "project",
           text: project.name ?? (project.url ? displayUrl(project.url) : ""),
           href: project.url,
-          right: projectRight(project),
+          right: projectRight(project, lang),
         },
       ];
       const note = [project.entity, project.type, ...(project.roles ?? [])]
@@ -208,7 +246,7 @@ export function buildModel(resume: Resume): CvModel {
       rows.push({
         kind: "row",
         runs: pair(schoolStudy(school), school.institution, school.url),
-        right: dateRange(school.startDate, school.endDate, false),
+        right: dateRange(school.startDate, school.endDate, false, lang),
         before: space(),
       });
       if (school.score) rows.push({ kind: "text", runs: plain(school.score) });
@@ -220,21 +258,42 @@ export function buildModel(resume: Resume): CvModel {
       const runs = name
         ? [{ text: name, href: url }, ...(issuer ? [{ text: `, ${issuer}` }] : [])]
         : plain(issuer ?? "");
-      rows.push({ kind: "row", runs, right: date && formatDate(date), before: space() });
+      rows.push({ kind: "row", runs, right: date && formatDate(date, lang), before: space() });
     }
   }
-  add("Education and certificates", rows.length ? [{ gap: 0, items: rows }] : []);
+  add(words.education, rows.length ? [{ gap: 0, items: rows }] : []);
 
   if (resume.languages?.length) {
-    add("Languages", [
+    add(words.languages, [
       { gap: 0, items: [{ kind: "text", runs: plain(languageList(resume.languages)) }] },
     ]);
   }
 
+  // The skills, then the closing's paragraphs and where to find him, as the end of the letter.
+  const other: Block[] = skills.length ? [{ gap: 0, items: skills }] : [];
+  const closing = basics?.closing ?? [];
+  if (closing.length) {
+    const separated = contact.flatMap((run, i) => (i ? [{ text: "  ·  " }, run] : [run]));
+    other.push({
+      gap: GAP.bullet,
+      items: [
+        ...closing.map((text, i): Item => ({
+          kind: "text",
+          runs: plain(text),
+          before: i ? GAP.bullet : 0,
+        })),
+        { kind: "contact", runs: separated, before: 8 },
+      ],
+    });
+  }
+  add(words.other, other);
+
   return {
     name: basics?.name,
+    born: basics?.birthDate && formatBirthDate(basics.birthDate, lang),
     label: basics?.label,
     contact,
+    summary: paragraphs(basics?.summary).map(plain),
     footer: footerLabel(basics?.name),
     sections,
   };
