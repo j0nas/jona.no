@@ -7,9 +7,13 @@ icon: screw-game
 when: August–September 2026
 stack: Godot 4, GDScript, Jolt physics
 status: Three milestones built, waiting for a playtest
+image: screw-game.webp
+imageAlt: The workbench in the shed, with a pile of brass and steel screws between two glass jars
 ---
 
 You sort a dead relative's workshop, and every can of screws is a project they built. Sorting has to be satisfying on its own before anything else matters, so real piles, physics and rummaging came first.
+
+![The tool wall, with a magnet wand, pans and brushes hung on a pegboard with prices in screws](/img/projects/screw-game-2.webp)
 
 ## Highlights
 

@@ -9,7 +9,7 @@ stack: TypeScript, Effect, Fastify, Postgres, Fly.io Machines, MCP
 status: Paused, no real users
 links: [pep.dev](https://pep.dev)
 image: pep.webp
-imageAlt: The pep.dev holding page, ink flowing out of the letters
+imageAlt: The pep.dev landing page from April 2026, a dark page headed "The deployment platform for your coding agent" beside a terminal where an agent deploys an app
 ---
 
 An agent deploys an app through Pep's MCP tool, within a budget, and every app has a contract with a time to live and a spending ceiling that Pep enforces by itself. I built it in the evenings alongside my last contract, and it has been paused since April.
