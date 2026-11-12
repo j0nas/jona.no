@@ -45,7 +45,6 @@ const DESKTOP_ICONS: { id: string; appId: AppId; label: string }[] = [
   { id: "cv", appId: "cv", label: CV_DOCS.en },
   { id: "cv/no", appId: "cv/no", label: CV_DOCS.no },
   { id: "project", appId: "project", label: "Projects" },
-  { id: "wordpad", appId: "wordpad", label: "Document.rtf" },
   { id: "personal-details", appId: "personal-details", label: "personal-details.txt" },
   { id: "personal", appId: "personal", label: "Personal" },
   { id: "documents", appId: "documents", label: "Documents" },
