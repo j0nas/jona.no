@@ -20,6 +20,7 @@
   font-size: 11px;
   line-height: 1.4;
   color: var(--w95-window-text);
+  -webkit-font-smoothing: auto;
 }
 
 .web p {
@@ -116,6 +117,7 @@
   font-weight: 700;
   color: #000080;
   pointer-events: none;
+  -webkit-font-smoothing: auto;
 }
 
 .icons {

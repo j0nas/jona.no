@@ -18,6 +18,9 @@
   font-size: 14px;
   line-height: 1.4;
   color: var(--w95-window-text);
+  /* An outline face at reading size: smoothing back on, which .w95 turns off for the bitmap UI
+     font and which leaves Times a hairline on a Retina screen. */
+  -webkit-font-smoothing: auto;
 }
 
 .document h1,
