@@ -1,0 +1,132 @@
+/*
+ * A folder in Web View (the Windows 98 desktop update): the white client area behind the
+ * sunken client edge, split into the info panel on the left, set in Verdana as Microsoft's
+ * folder template set it, and the icon list to its right.
+ */
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  background: var(--w95-window);
+  box-shadow: var(--w95-bevel-sunken);
+  container-type: inline-size;
+}
+
+.web {
+  flex: 0 0 210px;
+  overflow: auto;
+  padding: 10px 12px 16px;
+  font-family: Verdana, Tahoma, sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--w95-window-text);
+}
+
+.web p {
+  margin: 0 0 8px;
+}
+
+.folder {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.title {
+  margin: 4px 0 6px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* The folder template's rule under the title: navy fading into the window colour. */
+.rule {
+  height: 2px;
+  margin: 0 0 10px;
+  border: 0;
+  background: linear-gradient(to right, #000080, #1084d0 60%, var(--w95-window));
+}
+
+.name {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.preview {
+  all: unset;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 4px 0 8px;
+  cursor: pointer;
+  box-shadow: var(--w95-bevel-sunken-thin);
+}
+
+.preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+  object-fit: contain;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.facts {
+  margin: 0 0 10px;
+}
+
+.facts dt {
+  font-weight: 700;
+}
+
+.facts dd {
+  margin: 0 0 4px;
+}
+
+.facts a {
+  color: #0000ff;
+}
+
+.facts a:visited {
+  color: #800080;
+}
+
+.open {
+  min-width: 75px;
+}
+
+/* The list: 75px large-icon cells, left to right, one group per kind. */
+.pane {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 6px 4px 8px;
+}
+
+.group + .group {
+  margin-top: 6px;
+}
+
+.kind {
+  margin: 0 4px 2px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--w95-3d-shadow);
+  font-family: Verdana, Tahoma, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #000080;
+  pointer-events: none;
+}
+
+.icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 75px);
+  grid-auto-rows: 75px;
+}
+
+/* Too narrow for the panel, as on a phone: the icons alone, as a plain folder shows them. */
+@container (width < 520px) {
+  .web {
+    display: none;
+  }
+}

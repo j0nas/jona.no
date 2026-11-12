@@ -23,7 +23,7 @@ const sources = import.meta.glob("../../content/docs/*.md", {
 
 // Links out of a document open in a new tab; footnote refs and other in-page
 // anchors keep the default so they scroll within the window.
-const linkRenderer = {
+export const linkRenderer = {
   link(
     this: { parser: { parseInline(tokens: Tokens.Link["tokens"]): string } },
     token: Tokens.Link,
@@ -36,7 +36,8 @@ const linkRenderer = {
   },
 };
 
-function render(slug: string, markdown: string): string {
+/** Markdown as this site renders it: GFM, links out in a new tab, footnotes as a "Notes" section. */
+export function render(slug: string, markdown: string): string {
   return new Marked({ gfm: true })
     .use({ renderer: linkRenderer })
     .use(

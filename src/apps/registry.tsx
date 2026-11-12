@@ -1,4 +1,5 @@
 import { docBySlug } from "../docs";
+import { projectBySlug } from "../projects";
 import { CV_DOCS } from "./word/downloads/files";
 
 // App metadata. Icons are the authentic Win95 icon bitmaps (16-colour shell
@@ -71,6 +72,13 @@ export const apps = {
     title: "Personal",
     defaultSize: { width: 400, height: 300 },
   },
+  // The Projects folder (content/projects/): a web-view folder whose icons open each project's window.
+  project: {
+    icon: "/img/win95/folder-32.png",
+    iconSmall: "/img/win95/folder-16.png",
+    title: "Projects",
+    defaultSize: { width: 860, height: 600 },
+  },
   documents: {
     icon: "/img/win95/folder-32.png",
     iconSmall: "/img/win95/folder-16.png",
@@ -109,7 +117,10 @@ export const embeddedAppIds = (Object.keys(apps) as AppId[]).filter((id) => appM
 // they're data, so they don't get registry entries; windowMeta() synthesises
 // their metadata (a read-only WordPad) from the docs index instead.
 export type DocWindowId = `docs/${string}`;
-export type WindowId = AppId | DocWindowId;
+// A *project* window shows one project from content/projects/ (see src/projects) in a
+// read-only WordPad, opened from the Projects folder. Its id is its route too: /project/<slug>.
+export type ProjectWindowId = `project/${string}`;
+export type WindowId = AppId | DocWindowId | ProjectWindowId;
 
 export function isDocWindow(id: string): id is DocWindowId {
   return id.startsWith("docs/");
@@ -119,14 +130,37 @@ export function docSlug(id: DocWindowId): string {
   return id.slice("docs/".length);
 }
 
+export function isProjectWindow(id: string): id is ProjectWindowId {
+  return id.startsWith("project/");
+}
+
+export function projectSlug(id: ProjectWindowId): string {
+  return id.slice("project/".length);
+}
+
 export function isWindowId(id: string): id is WindowId {
-  return isDocWindow(id) ? docBySlug.has(docSlug(id)) : id in apps;
+  if (isDocWindow(id)) return docBySlug.has(docSlug(id));
+  if (isProjectWindow(id)) return projectBySlug.has(projectSlug(id));
+  return id in apps;
 }
 
 const DOC_WINDOW_SIZE = { width: 780, height: 580 };
 
-/** Metadata for any window — a registered app or a document. */
+const PROJECT_WINDOW_SIZE = { width: 760, height: 620 };
+
+/** Metadata for any window — a registered app, a document or a project. */
 export function windowMeta(id: WindowId): AppMeta {
+  if (isProjectWindow(id)) {
+    const project = projectBySlug.get(projectSlug(id));
+    return {
+      icon: apps.wordpad.icon,
+      iconSmall: apps.wordpad.iconSmall,
+      // Explorer hides the extension of a registered file type, as WordPad's title does then.
+      title: `${project?.title ?? id} - WordPad`,
+      defaultSize: PROJECT_WINDOW_SIZE,
+      tall: true,
+    };
+  }
   if (isDocWindow(id)) {
     const doc = docBySlug.get(docSlug(id));
     return {

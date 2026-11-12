@@ -11,6 +11,7 @@ import Personal from "../../apps/personal/Personal";
 import Documents from "../../apps/documents/Documents";
 import Domains from "../../apps/domains/Domains";
 import DocViewer from "../../apps/documents/DocViewer";
+import Projects from "../../apps/projects/Projects";
 import EmbeddedApp from "../../apps/embedded/EmbeddedApp";
 import InternetExplorer from "../../apps/internet/InternetExplorer";
 import ShutDown from "../../apps/system/ShutDown";
@@ -19,12 +20,16 @@ import { resolveRun } from "../../apps/system/runCommand";
 import {
   apps,
   embeddedAppIds,
+  docSlug,
   isDocWindow,
+  isProjectWindow,
+  projectSlug,
   windowMeta,
   type AppId,
   type WindowId,
 } from "../../apps/registry";
-import { docs } from "../../docs";
+import { docBySlug, docs } from "../../docs";
+import { projectBySlug } from "../../projects";
 import { CV_DOCS } from "../../apps/word/downloads/files";
 import styles from "./Desktop.module.css";
 
@@ -39,6 +44,7 @@ const DESKTOP_ICONS: { id: string; appId: AppId; label: string }[] = [
   { id: "internet", appId: "internet", label: "The Internet" },
   { id: "cv", appId: "cv", label: CV_DOCS.en },
   { id: "cv/no", appId: "cv/no", label: CV_DOCS.no },
+  { id: "project", appId: "project", label: "Projects" },
   { id: "wordpad", appId: "wordpad", label: "Document.rtf" },
   { id: "personal-details", appId: "personal-details", label: "personal-details.txt" },
   { id: "personal", appId: "personal", label: "Personal" },
@@ -87,6 +93,7 @@ const renderers: Partial<Record<AppId, Renderer>> = {
   "recycle-bin": (controls) => <RecycleBin controls={controls} />,
   personal: (controls) => <Personal controls={controls} />,
   documents: (controls, open) => <Documents controls={controls} onOpen={open} />,
+  project: (controls, open) => <Projects controls={controls} onOpen={open} />,
   domains: (controls) => <Domains controls={controls} />,
 };
 
@@ -248,6 +255,11 @@ export default function Desktop() {
             icon: apps.documents.iconSmall,
             onClick: () => openApp("documents"),
           },
+          {
+            label: "Pro&jects",
+            icon: apps.project.iconSmall,
+            onClick: () => openApp("project"),
+          },
           { label: "Do&mains", icon: apps.domains.iconSmall, onClick: () => openApp("domains") },
           // Embedded apps (registry `embed` field) get a Programs entry automatically.
           ...embeddedAppIds.map((id) => ({
@@ -345,7 +357,17 @@ export default function Desktop() {
         return (
           <Fragment key={w.id}>
             {isDocWindow(w.id) ? (
-              <DocViewer id={w.id} controls={controls} />
+              <DocViewer
+                id={w.id}
+                html={docBySlug.get(docSlug(w.id))?.html ?? ""}
+                controls={controls}
+              />
+            ) : isProjectWindow(w.id) ? (
+              <DocViewer
+                id={w.id}
+                html={projectBySlug.get(projectSlug(w.id))?.html ?? ""}
+                controls={controls}
+              />
             ) : windowMeta(w.id).embed ? (
               <EmbeddedApp id={w.id} controls={controls} />
             ) : (

@@ -138,3 +138,27 @@
 .document sup a {
   text-decoration: none;
 }
+
+/* A project's window (src/projects): the tagline under its name, its picture, and its facts. */
+.document :global(.tagline) {
+  margin-top: -0.3em;
+  font-style: italic;
+}
+
+.document figure {
+  margin: 0 0 0.8em;
+}
+
+.document figure img,
+.document p > img {
+  display: block;
+  width: auto;
+  max-height: 520px;
+  padding: 2px;
+  box-sizing: border-box;
+  box-shadow: var(--w95-bevel-sunken-thin);
+}
+
+.document :global(.facts) th {
+  white-space: nowrap;
+}

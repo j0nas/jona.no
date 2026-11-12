@@ -64,6 +64,21 @@ Times New Roman in WordPad" look lives. Author with plain headings, lists and ta
 content is ours, so the HTML is trusted and rendered as-is. Images go in
 `public/img/docs/<slug>/` and are referenced by absolute path (`/img/docs/<slug>/x.png`).
 
+## Adding a project
+
+The Projects folder (`/project`, on the desktop and in Start › Programs) is a showcase of what I've
+built, opened in interviews. It's data too: drop `content/projects/<slug>.md` and it appears as an
+icon in the folder, in its group, and opens at `/project/<slug>` in a read-only WordPad. The file
+starts with a block of `key: value` lines between `---` fences (`title`, `tagline`, `kind`,
+`order`, `when`, `stack`, `icon`, and optionally `status`, `links` as Markdown, `image` and
+`imageAlt`), parsed and compiled by `src/projects/index.ts`; the markdown after it is the write-up.
+The folder (`src/apps/projects/Projects.tsx`) is Explorer in Windows 98's web view: the panel on
+the left describes the selected project with its picture, and drops away in a narrow window. Icons
+are Win95 bitmaps from `@react95/icons` (MIT) in `public/img/projects/icons/<icon>-32.png` and
+`-16.png`; pictures are WebP in `public/img/projects/`, and a test checks they all exist. The page
+is public, so keep out anything about how media or books were obtained, the names of family,
+friends and clients, and links to private repos.
+
 ## The CV
 
 The CV is in Norwegian and English, a file of JSON Resume v1.0.0 each: `content/cv/resume.no.json`

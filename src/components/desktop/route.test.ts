@@ -14,6 +14,13 @@ describe("the address of a window", () => {
   test("a window has its id, and a document its folder too", () => {
     expect(pathOf("cv")).toBe("/cv");
     expect(pathOf("docs/hello")).toBe("/docs/hello");
+    expect(pathOf("project/edh-land")).toBe("/project/edh-land");
+  });
+
+  test("a project opens from its address, and only a project that exists", () => {
+    expect(windowIdFromPath("/project")).toBe("project");
+    expect(windowIdFromPath("/project/edh-land/")).toBe("project/edh-land");
+    expect(windowIdFromPath("/project/nothing-here")).toBeNull();
   });
 
   test("the home page has one address, whichever way it was opened", () => {

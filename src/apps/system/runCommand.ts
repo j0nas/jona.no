@@ -14,6 +14,7 @@ const ALIASES: Record<string, AppId> = {
   "the internet": "internet",
   winword: "cv",
   word: "cv",
+  projects: "project",
 };
 
 export type RunTarget = { window: WindowId } | { url: string };

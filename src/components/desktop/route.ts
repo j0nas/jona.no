@@ -1,8 +1,9 @@
 import { isWindowId, type WindowId } from "../../apps/registry";
 
 // The desktop is "routed" by the focused window: each app — built-in or
-// embedded — is shareable at /<id> (e.g. /floor-planner), and each document at
-// /docs/<slug>, which opens the desktop with that window already open. The bare
+// embedded — is shareable at /<id> (e.g. /floor-planner), each document at
+// /docs/<slug> and each project at /project/<slug>, which opens the desktop with
+// that window already open. The bare
 // embedded builds live at /apps/<id>/ instead, so there's no collision. The home
 // page's one address is "/", which is what /internet also opens and becomes.
 
